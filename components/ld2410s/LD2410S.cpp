@@ -48,24 +48,24 @@ namespace esphome
         }
 
         void LD2410S::enable_configuration_command() {
-            CmdFrameT en_conf_cmd = {
-                .header = CMD_FRAME_HEADER,
-                .command = START_CONFIG_MODE_CMD,
-                .data = START_CONFIG_MODE_VALUE,
-                .data_length = 2,
-                .footer = CMD_FRAME_FOOTER
-            };
-            this->send_command(start_cfg);
+            // CmdFrameT en_conf_cmd = {
+            //     .header = CMD_FRAME_HEADER,
+            //     .command = START_CONFIG_MODE_CMD,
+            //     .data = START_CONFIG_MODE_VALUE,
+            //     .data_length = 2,
+            //     .footer = CMD_FRAME_FOOTER
+            // };
+            // this->send_command(en_conf_cmd);
         }
 
         void LD2410S::disable_configuration_command() {
-            CmdFrameT dis_conf_cmd = {
-                .header = CMD_FRAME_HEADER,
-                .command = END_CONFIG_MODE_CMD,
-                .data_length = 0,
-                .footer = CMD_FRAME_FOOTER
-            };
-            this->send_command(dis_conf_cmd);
+            // CmdFrameT dis_conf_cmd = {
+            //     .header = CMD_FRAME_HEADER,
+            //     .command = END_CONFIG_MODE_CMD,
+            //     .data_length = 0,
+            //     .footer = CMD_FRAME_FOOTER
+            // };
+            // this->send_command(dis_conf_cmd);
         }
 
         void LD2410S::apply_config() {
