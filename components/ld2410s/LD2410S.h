@@ -108,6 +108,8 @@ namespace esphome {
 
             void register_listener(LD2410SListener* listener) { this->listeners.push_back(listener); };
             void set_config_mode(bool enabled);
+            void enable_configuration_command();
+            void disable_configuration_command();
             void apply_config();
             void start_auto_threshold_update();
 #ifdef USE_NUMBER
