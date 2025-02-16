@@ -10,10 +10,10 @@ namespace esphome
 
         void LD2410S::setup() {
             this->set_config_mode(true);
-            CmdFrameT read_fw_cmd = this->prepare_read_fw_cmd();
-            this->send_command(read_fw_cmd);
-            CmdFrameT read_config_cmd = this->prepare_read_config_cmd();
-            this->send_command(read_config_cmd);
+            // CmdFrameT read_fw_cmd = this->prepare_read_fw_cmd();
+            // this->send_command(read_fw_cmd);
+            // CmdFrameT read_config_cmd = this->prepare_read_config_cmd();
+            // this->send_command(read_config_cmd);
             this->set_config_mode(false);
         }
 
