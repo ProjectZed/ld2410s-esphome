@@ -10,26 +10,25 @@ namespace esphome
 
         void LD2410S::setup() {
             this->set_config_mode(true);
-            // CmdFrameT read_fw_cmd = this->prepare_read_fw_cmd();
-            // this->send_command(read_fw_cmd);
-            // CmdFrameT read_config_cmd = this->prepare_read_config_cmd();
-            // this->send_command(read_config_cmd);
+            CmdFrameT read_fw_cmd = this->prepare_read_fw_cmd();
+            this->send_command(read_fw_cmd);
+            CmdFrameT read_config_cmd = this->prepare_read_config_cmd();
+            this->send_command(read_config_cmd);
             this->set_config_mode(false);
         }
 
         void LD2410S::loop() {
-            // disable this for now, focus on setup
-            // if (!this->cmd_active) {
-            //     static uint8_t buffer[64];
-            //     static size_t pos = 0;
-            //     while (available()) {
-            //         PackageType type = this->read_line(read(), buffer, pos++);
-            //         if (type == PackageType::SHORT_DATA || type == PackageType::TRESHOLD) {
-            //             this->process_data_package(type, buffer, pos);
-            //             pos = 0;
-            //         }
-            //     }
-            // }
+            if (!this->cmd_active) {
+                static uint8_t buffer[64];
+                static size_t pos = 0;
+                while (available()) {
+                    PackageType type = this->read_line(read(), buffer, pos++);
+                    if (type == PackageType::SHORT_DATA || type == PackageType::TRESHOLD) {
+                        this->process_data_package(type, buffer, pos);
+                        pos = 0;
+                    }
+                }
+            }
         }
 
         void LD2410S::set_config_mode(bool enabled) {
