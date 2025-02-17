@@ -25,19 +25,19 @@ namespace esphome {
         static const uint32_t THRESHOLD_FOOTER = 0xF5F6F7F8;
 
         static const uint16_t READ_FW_CMD = 0x0000;
-        static const uint16_t START_CONFIG_MODE_CMD = 0x00FF;
-        static const uint16_t END_CONFIG_MODE_CMD = 0x00FE;
+        // static const uint16_t START_CONFIG_MODE_CMD = 0x00FF;
+        // static const uint16_t END_CONFIG_MODE_CMD = 0x00FE;
         static const uint16_t WRITE_PARAMS_CMD = 0x0070;
         static const uint16_t READ_PARAMS_CMD = 0x0071;
         static const uint16_t AUTO_UPDATE_THRESHOLD_CMD = 0x0009;
 
 
-        // static const uint16_t START_CONFIG_MODE_CMD = 0x00FF;
-        // static const uint8_t START_CONFIG_MODE_VALUE[] = {0x01, 0x00}; // 0x0001
+        static const uint16_t START_CONFIG_MODE_CMD = 0x00FF;
+        static const uint8_t START_CONFIG_MODE_VALUE[] = {0x01, 0x00}; // 0x0001
 
-        // static const uint16_t END_CONFIG_MODE_CMD = 0x00FE;
+        static const uint16_t END_CONFIG_MODE_CMD = 0x00FE;
 
-        static const uint16_t START_CONFIG_MODE_VALUE = 0x0001;
+        // static const uint16_t START_CONFIG_MODE_VALUE = 0x0001;
         static const uint16_t CFG_MAX_DETECTION_VALUE = 0x0005;
         static const uint16_t CFG_MIN_DETECTION_VALUE = 0x000A;
         static const uint16_t CFG_NO_DELAY_VALUE = 0x0006;
