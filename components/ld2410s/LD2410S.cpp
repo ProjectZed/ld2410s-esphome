@@ -185,6 +185,7 @@ namespace esphome
 
         void LD2410S::send_command(CmdFrameT frame)
         {
+            ESP_LOGD(TAG, "Sending command %x", frame.command);
             this->cmd_active = true;
             uint32_t start_millis = millis();
             uint8_t retry = 3;
