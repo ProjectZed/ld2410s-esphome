@@ -10,8 +10,7 @@ namespace esphome
 
         void LD2410S::setup() {
             this->enable_configuration_command();
-            CmdFrameT read_fw_cmd = this->prepare_read_fw_cmd();
-            this->send_command(read_fw_cmd);
+            this->read_fw_version();
             CmdFrameT read_config_cmd = this->prepare_read_config_cmd();
             this->send_command(read_config_cmd);
             this->disable_configuration_command();
@@ -32,24 +31,31 @@ namespace esphome
         }
 
         void LD2410S::enable_configuration_command() {
-            CmdFrameT en_conf_cmd = {
-                .header = CMD_FRAME_HEADER,
-                .command = START_CONFIG_MODE_CMD,
-                .data = {START_CONFIG_MODE_VALUE[0], START_CONFIG_MODE_VALUE[1]},
-                .data_length = 2,
-                .footer = CMD_FRAME_FOOTER
-            };
+            CmdFrameT en_conf_cmd = this->build_cmd_frame(START_CONFIG_MODE_CMD, START_CONFIG_MODE_VALUE, 2);
             this->send_command(en_conf_cmd);
         }
 
         void LD2410S::disable_configuration_command() {
-            CmdFrameT dis_conf_cmd = {
+            CmdFrameT dis_conf_cmd = this->build_cmd_frame(END_CONFIG_MODE_CMD, nullptr, 0);
+            this->send_command(dis_conf_cmd);
+        }
+
+        void LD2410S::read_fw_version() {
+            CmdFrameT read_fw_cmd = this->build_cmd_frame(READ_FW_CMD, nullptr, 0);
+            this->send_command(read_fw_cmd);
+        }
+
+        CmdFrameT build_cmd_frame(uint16_t command, uint8_t* data, size_t data_length) {
+            CmdFrameT cmd_frame = {
                 .header = CMD_FRAME_HEADER,
-                .command = END_CONFIG_MODE_CMD,
-                .data_length = 0,
+                .command = command,
+                .data_length = data_length,
                 .footer = CMD_FRAME_FOOTER
             };
-            this->send_command(dis_conf_cmd);
+            for (size_t i = 0; i < data_length; i++) {
+                cmd_frame.data[i] = data[i];
+            }
+            return cmd_frame;
         }
 
         void LD2410S::apply_config() {
@@ -170,7 +176,7 @@ namespace esphome
 
         void LD2410S::send_command(CmdFrameT frame)
         {
-            ESP_LOGD(TAG, "Sending command %x", frame.command);
+            ESP_LOGD(TAG, "Sending command: %x", frame);
             this->cmd_active = true;
             uint32_t start_millis = millis();
             uint8_t retry = 3;
@@ -232,6 +238,7 @@ namespace esphome
                     retry = 0;
                 }
             }
+            ESP_LOGD(TAG, "Execution time: %d", millis() - start_millis);
             this->cmd_active = false;
         }
 

@@ -107,8 +107,11 @@ namespace esphome {
             float get_setup_priority() const override;
 
             void register_listener(LD2410SListener* listener) { this->listeners.push_back(listener); };
+
             void enable_configuration_command();
             void disable_configuration_command();
+            void read_fw_version();
+
             void apply_config();
             void start_auto_threshold_update();
 #ifdef USE_NUMBER
