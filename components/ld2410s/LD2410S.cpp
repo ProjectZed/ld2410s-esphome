@@ -56,10 +56,11 @@ namespace esphome
             CmdFrameT en_conf_cmd = {
                 .header = CMD_FRAME_HEADER,
                 .command = START_CONFIG_MODE_CMD,
-                .data = START_CONFIG_MODE_VALUE,
                 .data_length = 2,
                 .footer = CMD_FRAME_FOOTER
             };
+            en_conf_cmd.data[0] = START_CONFIG_MODE_VALUE[0];
+            en_conf_cmd.data[1] = START_CONFIG_MODE_VALUE[1];
             this->send_command(en_conf_cmd);
         }
 
