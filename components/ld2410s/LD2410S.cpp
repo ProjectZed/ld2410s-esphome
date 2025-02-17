@@ -232,6 +232,7 @@ namespace esphome
                             last_pos = 0;
                         }
                     }
+                    ESP_LOGD(TAG, "ACK Buffer: %x", ack_buffer);
                     delay_microseconds_safe(1450);
                     if ((millis() - start_millis) > 1000)
                     {
@@ -250,7 +251,6 @@ namespace esphome
 
         PackageType LD2410S::read_line(uint8_t data, uint8_t* buffer, size_t pos) {
             buffer[pos] = data;
-            ESP_LOGD(TAG, "Reading line: %x", data);
 
             if (pos > 4) {
                 if (memcmp(&buffer[pos - 3], &CMD_FRAME_FOOTER, sizeof(CMD_FRAME_FOOTER)) == 0) {
