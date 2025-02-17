@@ -6,12 +6,12 @@ namespace esphome
     {
         void LD2410SEnableConfigButton::press_action()
         {
-            this->parent_->set_config_mode(true);
+            this->parent_->enable_configuration_command();
         }
 
         void LD2410SDisableConfigButton::press_action()
         {
-            this->parent_->set_config_mode(false);
+            this->parent_->disable_configuration_command();
         }
 
         void LD2410SApplyConfigButton::press_action()
