@@ -67,12 +67,12 @@ namespace esphome {
         };
 
         struct CmdFrameT {
-            uint32_t header{ 0 };
-            uint16_t length{ 0 };
-            uint16_t command{ 0 };
+            uint32_t header;
+            uint16_t length;
+            uint16_t command;
             uint8_t data[36];
-            uint16_t data_length{ 0 };
-            uint32_t footer{ 0 };
+            uint16_t data_length;
+            uint32_t footer;
         };
 
         struct CmdAckT {
@@ -107,7 +107,6 @@ namespace esphome {
             float get_setup_priority() const override;
 
             void register_listener(LD2410SListener* listener) { this->listeners.push_back(listener); };
-            void set_config_mode(bool enabled);
             void enable_configuration_command();
             void disable_configuration_command();
             void apply_config();
