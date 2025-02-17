@@ -33,7 +33,7 @@ namespace esphome {
 
 
         static const uint16_t START_CONFIG_MODE_CMD = 0x00FF;
-        static const uint8_t START_CONFIG_MODE_VALUE[36] = {0x01, 0x00}; // 0x0001
+        static const uint8_t START_CONFIG_MODE_VALUE[] = {0x01, 0x00}; // 0x0001
 
         static const uint16_t END_CONFIG_MODE_CMD = 0x00FE;
 
