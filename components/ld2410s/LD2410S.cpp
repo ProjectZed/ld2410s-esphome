@@ -32,39 +32,45 @@ namespace esphome
         }
 
         void LD2410S::set_config_mode(bool enabled) {
-            CmdFrameT start_cfg;
-            start_cfg.header = CMD_FRAME_HEADER;
-            start_cfg.command = enabled ? START_CONFIG_MODE_CMD : END_CONFIG_MODE_CMD;
-            start_cfg.data_length = 0;
-            if (enabled)
-            {
-                memcpy(&start_cfg.data[0], &START_CONFIG_MODE_VALUE, sizeof(START_CONFIG_MODE_VALUE));
-                start_cfg.data_length += sizeof(START_CONFIG_MODE_VALUE);
+            if (enabled) {
+                this->enable_configuration_command();
             }
+            else {
+                this->disable_configuration_command();
+            }
+            // CmdFrameT start_cfg;
+            // start_cfg.header = CMD_FRAME_HEADER;
+            // start_cfg.command = enabled ? START_CONFIG_MODE_CMD : END_CONFIG_MODE_CMD;
+            // start_cfg.data_length = 0;
+            // if (enabled)
+            // {
+            //     memcpy(&start_cfg.data[0], &START_CONFIG_MODE_VALUE, sizeof(START_CONFIG_MODE_VALUE));
+            //     start_cfg.data_length += sizeof(START_CONFIG_MODE_VALUE);
+            // }
 
-            start_cfg.footer = CMD_FRAME_FOOTER;
-            this->send_command(start_cfg);
+            // start_cfg.footer = CMD_FRAME_FOOTER;
+            // this->send_command(start_cfg);
         }
 
         void LD2410S::enable_configuration_command() {
-            // CmdFrameT en_conf_cmd = {
-            //     .header = CMD_FRAME_HEADER,
-            //     .command = START_CONFIG_MODE_CMD,
-            //     .data = START_CONFIG_MODE_VALUE,
-            //     .data_length = 2,
-            //     .footer = CMD_FRAME_FOOTER
-            // };
-            // this->send_command(en_conf_cmd);
+            CmdFrameT en_conf_cmd = {
+                .header = CMD_FRAME_HEADER,
+                .command = START_CONFIG_MODE_CMD,
+                .data = START_CONFIG_MODE_VALUE,
+                .data_length = 2,
+                .footer = CMD_FRAME_FOOTER
+            };
+            this->send_command(en_conf_cmd);
         }
 
         void LD2410S::disable_configuration_command() {
-            // CmdFrameT dis_conf_cmd = {
-            //     .header = CMD_FRAME_HEADER,
-            //     .command = END_CONFIG_MODE_CMD,
-            //     .data_length = 0,
-            //     .footer = CMD_FRAME_FOOTER
-            // };
-            // this->send_command(dis_conf_cmd);
+            CmdFrameT dis_conf_cmd = {
+                .header = CMD_FRAME_HEADER,
+                .command = END_CONFIG_MODE_CMD,
+                .data_length = 0,
+                .footer = CMD_FRAME_FOOTER
+            };
+            this->send_command(dis_conf_cmd);
         }
 
         void LD2410S::apply_config() {
