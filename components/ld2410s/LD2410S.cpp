@@ -18,17 +18,17 @@ namespace esphome
         }
 
         void LD2410S::loop() {
-            if (!this->cmd_active) {
-                static uint8_t buffer[64];
-                static size_t pos = 0;
-                while (available()) {
-                    PackageType type = this->read_line(read(), buffer, pos++);
-                    if (type == PackageType::SHORT_DATA || type == PackageType::TRESHOLD) {
-                        this->process_data_package(type, buffer, pos);
-                        pos = 0;
-                    }
-                }
-            }
+            // if (!this->cmd_active) {
+            //     static uint8_t buffer[64];
+            //     static size_t pos = 0;
+            //     while (available()) {
+            //         PackageType type = this->read_line(read(), buffer, pos++);
+            //         if (type == PackageType::SHORT_DATA || type == PackageType::TRESHOLD) {
+            //             this->process_data_package(type, buffer, pos);
+            //             pos = 0;
+            //         }
+            //     }
+            // }
         }
 
         void LD2410S::set_config_mode(bool enabled) {
