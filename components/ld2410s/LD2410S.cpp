@@ -233,7 +233,7 @@ namespace esphome
                             last_pos = 0;
                         }
                     }
-                    delayMicroseconds(1450);
+                    delay_microseconds_safe(1450);
                     if ((millis() - start_millis) > 1000)
                     {
                         start_millis = millis();
