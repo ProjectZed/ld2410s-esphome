@@ -9,58 +9,70 @@ namespace esphome
         static const char* TAG = "ld2410s";
 
         void LD2410S::setup() {
-            this->set_config_mode(true);
-            CmdFrameT read_fw_cmd = this->prepare_read_fw_cmd();
-            this->send_command(read_fw_cmd);
+            this->enable_configuration_command();
+            this->read_fw_version();
             CmdFrameT read_config_cmd = this->prepare_read_config_cmd();
             this->send_command(read_config_cmd);
-            this->set_config_mode(false);
+            this->disable_configuration_command();
         }
 
         void LD2410S::loop() {
-            if (!this->cmd_active) {
-                static uint8_t buffer[64];
-                static size_t pos = 0;
-                while (available()) {
-                    PackageType type = this->read_line(read(), buffer, pos++);
-                    if (type == PackageType::SHORT_DATA || type == PackageType::TRESHOLD) {
-                        this->process_data_package(type, buffer, pos);
-                        pos = 0;
-                    }
-                }
-            }
+            // if (!this->cmd_active) {
+            //     static uint8_t buffer[64];
+            //     static size_t pos = 0;
+            //     while (available()) {
+            //         PackageType type = this->read_line(read(), buffer, pos++);
+            //         if (type == PackageType::SHORT_DATA || type == PackageType::TRESHOLD) {
+            //             this->process_data_package(type, buffer, pos);
+            //             pos = 0;
+            //         }
+            //     }
+            // }
         }
 
-        void LD2410S::set_config_mode(bool enabled) {
-            CmdFrameT start_cfg;
-            start_cfg.header = CMD_FRAME_HEADER;
-            start_cfg.command = enabled ? START_CONFIG_MODE_CMD : END_CONFIG_MODE_CMD;
-            start_cfg.data_length = 0;
-            if (enabled)
-            {
-                memcpy(&start_cfg.data[0], &START_CONFIG_MODE_VALUE, sizeof(START_CONFIG_MODE_VALUE));
-                start_cfg.data_length += sizeof(START_CONFIG_MODE_VALUE);
-            }
+        void LD2410S::enable_configuration_command() {
+            CmdFrameT en_conf_cmd = this->build_cmd_frame(START_CONFIG_MODE_CMD, START_CONFIG_MODE_VALUE, 2);
+            this->send_command(en_conf_cmd);
+        }
 
-            start_cfg.footer = CMD_FRAME_FOOTER;
-            this->send_command(start_cfg);
+        void LD2410S::disable_configuration_command() {
+            CmdFrameT dis_conf_cmd = this->build_cmd_frame(END_CONFIG_MODE_CMD, nullptr, 0);
+            this->send_command(dis_conf_cmd);
+        }
+
+        void LD2410S::read_fw_version() {
+            CmdFrameT read_fw_cmd = this->build_cmd_frame(READ_FW_CMD, nullptr, 0);
+            this->send_command(read_fw_cmd);
+        }
+
+        CmdFrameT build_cmd_frame(uint16_t command, uint8_t* data, size_t data_length) {
+            CmdFrameT cmd_frame = {
+                .header = CMD_FRAME_HEADER,
+                .command = command,
+                .data_length = data_length,
+                .footer = CMD_FRAME_FOOTER
+            };
+            for (size_t i = 0; i < data_length; i++) {
+                cmd_frame.data[i] = data[i];
+            }
+            return cmd_frame;
         }
 
         void LD2410S::apply_config() {
             this->status_set_warning("Sending command to sensor");
-            this->set_config_mode(true);
+            this->enable_configuration_command();
             CmdFrameT apply_config_cmd = this->prepare_apply_config_cmd();
             this->send_command(apply_config_cmd);
-            this->set_config_mode(false);
+            this->disable_configuration_command();
             this->status_clear_warning();
         }
 
         void LD2410S::start_auto_threshold_update() {
             this->status_set_warning("Sending command to sensor");
-            this->set_config_mode(true);
+            this->enable_configuration_command();
             CmdFrameT threshold_update_cmd = this->prepare_threshold_cmd();
             this->send_command(threshold_update_cmd);
-            this->set_config_mode(false);
+            this->disable_configuration_command();
             this->status_clear_warning();
         }
 
@@ -164,6 +176,7 @@ namespace esphome
 
         void LD2410S::send_command(CmdFrameT frame)
         {
+            ESP_LOGD(TAG, "Sending command: %x", frame);
             this->cmd_active = true;
             uint32_t start_millis = millis();
             uint8_t retry = 3;
@@ -211,6 +224,7 @@ namespace esphome
                             last_pos = 0;
                         }
                     }
+                    ESP_LOGD(TAG, "ACK Buffer: %x", ack_buffer);
                     delay_microseconds_safe(1450);
                     if ((millis() - start_millis) > 1000)
                     {
@@ -224,6 +238,7 @@ namespace esphome
                     retry = 0;
                 }
             }
+            ESP_LOGD(TAG, "Execution time: %d", millis() - start_millis);
             this->cmd_active = false;
         }
 

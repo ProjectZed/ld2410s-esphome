@@ -25,13 +25,19 @@ namespace esphome {
         static const uint32_t THRESHOLD_FOOTER = 0xF5F6F7F8;
 
         static const uint16_t READ_FW_CMD = 0x0000;
-        static const uint16_t START_CONFIG_MODE_CMD = 0x00FF;
-        static const uint16_t END_CONFIG_MODE_CMD = 0x00FE;
+        // static const uint16_t START_CONFIG_MODE_CMD = 0x00FF;
+        // static const uint16_t END_CONFIG_MODE_CMD = 0x00FE;
         static const uint16_t WRITE_PARAMS_CMD = 0x0070;
         static const uint16_t READ_PARAMS_CMD = 0x0071;
         static const uint16_t AUTO_UPDATE_THRESHOLD_CMD = 0x0009;
 
-        static const uint16_t START_CONFIG_MODE_VALUE = 0x0001;
+
+        static const uint16_t START_CONFIG_MODE_CMD = 0x00FF;
+        static const uint8_t START_CONFIG_MODE_VALUE[] = {0x01, 0x00}; // 0x0001
+
+        static const uint16_t END_CONFIG_MODE_CMD = 0x00FE;
+
+        // static const uint16_t START_CONFIG_MODE_VALUE = 0x0001;
         static const uint16_t CFG_MAX_DETECTION_VALUE = 0x0005;
         static const uint16_t CFG_MIN_DETECTION_VALUE = 0x000A;
         static const uint16_t CFG_NO_DELAY_VALUE = 0x0006;
@@ -61,12 +67,12 @@ namespace esphome {
         };
 
         struct CmdFrameT {
-            uint32_t header{ 0 };
-            uint16_t length{ 0 };
-            uint16_t command{ 0 };
+            uint32_t header;
+            uint16_t length;
+            uint16_t command;
             uint8_t data[36];
-            uint16_t data_length{ 0 };
-            uint32_t footer{ 0 };
+            uint16_t data_length;
+            uint32_t footer;
         };
 
         struct CmdAckT {
@@ -101,7 +107,11 @@ namespace esphome {
             float get_setup_priority() const override;
 
             void register_listener(LD2410SListener* listener) { this->listeners.push_back(listener); };
-            void set_config_mode(bool enabled);
+
+            void enable_configuration_command();
+            void disable_configuration_command();
+            void read_fw_version();
+
             void apply_config();
             void start_auto_threshold_update();
 #ifdef USE_NUMBER
