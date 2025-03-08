@@ -325,34 +325,85 @@ namespace esphome
                 this->write_array(cmd_buffer, cmd_length);
                 this->flush();
 
-                bool reply = false;
-
-                while (!reply)
-                {
-                    uint8_t ack_buffer[64];
-                    size_t last_pos = 0;
-                    while (available())
-                    {
-                        PackageType type = this->read_line(read(), ack_buffer, last_pos++);
-                        if (type == PackageType::ACK)
-                        {
-                            reply = this->process_cmd_ack_package(ack_buffer, last_pos + 1);
-                            last_pos = 0;
+                uint8_t buffer[64]; // Adjust size based on maximum expected response
+                uint16_t buf_pos = 0;
+                uint32_t start_time = millis();
+                bool frame_started = false;
+                // State machine to read complete frame
+                while (millis() - start_time < 1000) { // 1 second timeout
+                    if (this->available()) {
+                        uint8_t byte = this->read();
+                        buffer[buf_pos++] = byte;
+                        
+                        // Check for header (need at least 4 bytes)
+                        if (buf_pos >= 4 && !frame_started) {
+                            uint32_t header = *reinterpret_cast<uint32_t*>(&buffer[buf_pos - 4]);
+                            if (header == FRAME_HEADER) {
+                                frame_started = true;
+                                // Reset the buffer to keep only the header
+                                memmove(buffer, &buffer[buf_pos - 4], 4);
+                                buf_pos = 4;
+                            }
                         }
+                        
+                        // Check for footer (need header plus at least 4 more bytes)
+                        if (frame_started && buf_pos >= 8) {
+                            uint32_t footer = *reinterpret_cast<uint32_t*>(&buffer[buf_pos - 4]);
+                            if (footer == FRAME_FOOTER) {
+                                // We have a complete frame
+                                break;
+                            }
+                        }
+                        
+                        // Prevent buffer overflow
+                        if (buf_pos >= sizeof(buffer)) {
+                            ESP_LOGD(TAG, "Buffer too small: %d", buf_pos);
+                            this->cmd_active = false;
+                            return;
+                        }
+                        
+                        // Reset timeout on each byte received
+                        start_time = millis();
                     }
-                    delay_microseconds_safe(1450);
-                    if ((millis() - start_millis) > 1000)
-                    {
-                        start_millis = millis();
-                        retry--;
-                        ESP_LOGD(TAG, "Retry: %d", retry);
-                        break;
-                    }
+                    yield(); // Allow background tasks
                 }
-                if (reply)
-                {
-                    retry = 0;
+                
+                // Check if we timed out
+                if (millis() - start_time >= 1000) {
+                    this->cmd_active = false;
+                    return;
                 }
+
+                log_buffer("REPLY:", buffer, buf_pos);
+
+                // bool reply = false;
+
+                // while (!reply)
+                // {
+                //     uint8_t ack_buffer[64];
+                //     size_t last_pos = 0;
+                //     while (available())
+                //     {
+                //         PackageType type = this->read_line(read(), ack_buffer, last_pos++);
+                //         if (type == PackageType::ACK)
+                //         {
+                //             reply = this->process_cmd_ack_package(ack_buffer, last_pos + 1);
+                //             last_pos = 0;
+                //         }
+                //     }
+                //     delay_microseconds_safe(1450);
+                //     if ((millis() - start_millis) > 1000)
+                //     {
+                //         start_millis = millis();
+                //         retry--;
+                //         ESP_LOGD(TAG, "Retry: %d", retry);
+                //         break;
+                //     }
+                // }
+                // if (reply)
+                // {
+                //     retry = 0;
+                // }
             }
             ESP_LOGD(TAG, "Execution time: %d", millis() - start_millis);
             this->cmd_active = false;
