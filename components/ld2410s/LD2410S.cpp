@@ -300,11 +300,11 @@ namespace esphome
 
         void LD2410S::process_read_sn_ack(uint8_t* data) {
             ESP_LOGD(TAG, "Read serial number DATA: %x", data);
-            std::string sn = std::string(data);
-            for (auto& listener : this->listeners) {
-                listener->on_sn(sn);
-            }
-            ESP_LOGD(TAG, "Read serial number reply: %s", sn.c_str());
+            // std::string sn = std::string(data);
+            // for (auto& listener : this->listeners) {
+            //     listener->on_sn(sn);
+            // }
+            // ESP_LOGD(TAG, "Read serial number reply: %s", sn.c_str());
         }
 
         bool LD2410S::process_cmd_ack_package(uint8_t* buffer, int len) {
