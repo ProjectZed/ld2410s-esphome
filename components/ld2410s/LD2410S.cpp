@@ -433,15 +433,16 @@ namespace esphome
             bool result = ack.result;
             if (!result)
             {
-                ESP_LOGW(TAG, "Command %x failed", command_word);
+                ESP_LOGE(TAG, "Command Failed: 0x%04X", command_word);
                 return false;
             }
             else
             {
-                ESP_LOGI(TAG, "Command %x success", command_word);
+                ESP_LOGI(TAG, "Command Success: 0x%04X", command_word);
             }
 
             uint8_t *data = ack.data;
+            log_buffer("ACK:", data, sizeof(data));
 
             switch (command_word)
             {
