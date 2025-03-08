@@ -154,7 +154,7 @@ namespace esphome
         void log_command_frame(const CmdFrameT &frame, const uint8_t *cmd_buffer, uint16_t cmd_length)
         {
             // Log the buffer as hex values
-            log_buffer(TAG, "CMD:", cmd_buffer, cmd_length);
+            log_buffer("CMD:", cmd_buffer, cmd_length);
 
             // Detailed structure logging
             uint16_t frame_data_bytes = frame.data_length + 2;
