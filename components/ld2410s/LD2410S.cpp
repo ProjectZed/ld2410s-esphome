@@ -11,9 +11,9 @@ namespace esphome
         void LD2410S::setup() {
             this->enable_configuration_command();
             this->read_fw_version();
-            this->read_serial_number();
-            CmdFrameT read_config_cmd = this->prepare_read_config_cmd();
-            this->send_command(read_config_cmd);
+            // this->read_serial_number();
+            // CmdFrameT read_config_cmd = this->prepare_read_config_cmd();
+            // this->send_command(read_config_cmd);
             this->disable_configuration_command();
         }
 
@@ -58,10 +58,49 @@ namespace esphome
                 .data_length = data_length,
                 .footer = CMD_FRAME_FOOTER
             };
-            for (size_t i = 0; i < data_length; i++) {
+            for (uint16_t i = 0; i < data_length; i++) {
                 cmd_frame.data[i] = data[i];
             }
             return cmd_frame;
+        }
+
+        uint16_t frame_to_buffer(const CmdFrameT& frame, uint8_t* cmd_buffer, uint16_t buffer_size) {
+            uint16_t pos = 0;
+            uint16_t frame_data_bytes = frame.data_length + 2; // Command (2 bytes) + data
+            uint16_t total_required_size = sizeof(frame.header) + sizeof(frame.data_length) + 
+                                          sizeof(frame.command) + frame.data_length + sizeof(frame.footer);
+            
+            // Check if buffer is large enough
+            if (buffer_size < total_required_size) {
+                return 0; // Buffer too small
+            }
+            
+            // HEADER - direct assignment
+            uint32_t* header_ptr = reinterpret_cast<uint32_t*>(&cmd_buffer[pos]);
+            *header_ptr = frame.header;
+            pos += sizeof(frame.header);
+            
+            // SIZE - direct assignment
+            uint16_t* size_ptr = reinterpret_cast<uint16_t*>(&cmd_buffer[pos]);
+            *size_ptr = frame_data_bytes;
+            pos += sizeof(frame.data_length);
+            
+            // COMMAND - direct assignment
+            uint16_t* cmd_ptr = reinterpret_cast<uint16_t*>(&cmd_buffer[pos]);
+            *cmd_ptr = frame.command;
+            pos += sizeof(frame.command);
+            
+            // DATA - direct assignment in loop
+            for (uint16_t i = 0; i < frame.data_length; i++) {
+                cmd_buffer[pos++] = frame.data[i];
+            }
+            
+            // FOOTER - direct assignment
+            uint32_t* footer_ptr = reinterpret_cast<uint32_t*>(&cmd_buffer[pos]);
+            *footer_ptr = frame.footer;
+            pos += sizeof(frame.footer);
+            
+            return pos; // Return the actual buffer length
         }
 
         void LD2410S::apply_config() {
@@ -187,35 +226,17 @@ namespace esphome
             uint32_t start_millis = millis();
             uint8_t retry = 3;
             uint8_t cmd_buffer[64];
+            uint16_t cmd_length = frame_to_buffer(frame, cmd_buffer, sizeof(cmd_buffer));
+            if (cmd_length == 0) {
+                ESP_LOGD(TAG, "Command buffer too small");
+                this->cmd_active = false;
+                return;
+            }
 
             while (retry)
             {
-                frame.length = 0;
-                uint16_t frame_data_bytes = frame.data_length + 2;
-                // HEADER
-                memcpy(&cmd_buffer[frame.length], &frame.header, sizeof(frame.header));
-                frame.length += sizeof(frame.header);
-                // SIZE
-                memcpy(&cmd_buffer[frame.length], &frame_data_bytes, sizeof(frame.data_length));
-                frame.length += sizeof(frame.data_length);
-                // COMMAND
-                memcpy(&cmd_buffer[frame.length], &frame.command, sizeof(frame.command));
-                frame.length += sizeof(frame.command);
-                // DATA
-                for (uint16_t index = 0; index < frame.data_length; index++)
-                {
-                    memcpy(&cmd_buffer[frame.length], &frame.data[index], sizeof(frame.data[index]));
-                    frame.length += sizeof(frame.data[index]);
-                }
-                // FOOTER
-                memcpy(cmd_buffer + frame.length, &frame.footer, sizeof(frame.footer));
-                frame.length += sizeof(frame.footer);
-                // WRITE
-                for (uint16_t index = 0; index < frame.length; index++)
-                {
-                    this->write_byte(cmd_buffer[index]);
-                }
-
+                ESP_LOGD(TAG, "Sending command: %x", cmd_buffer);
+                this->write_array(cmd_buffer, cmd_length);
                 this->flush();
 
                 bool reply = false;
@@ -230,12 +251,12 @@ namespace esphome
                             last_pos = 0;
                         }
                     }
-                    ESP_LOGD(TAG, "ACK Buffer: %x", ack_buffer);
                     delay_microseconds_safe(1450);
                     if ((millis() - start_millis) > 1000)
                     {
                         start_millis = millis();
                         retry--;
+                        ESP_LOGD(TAG, "Retry: %d", retry);
                         break;
                     }
                 }
