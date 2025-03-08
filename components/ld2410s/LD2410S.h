@@ -98,6 +98,7 @@ namespace esphome {
             virtual void on_threshold_update(bool running) {};
             virtual void on_threshold_progress(int progress) {};
             virtual void on_fw_version(std::string& fw) {};
+            virtual void on_sn(std::string& sn) {};
         };
 
         class LD2410S : public uart::UARTDevice, public Component {
