@@ -114,6 +114,7 @@ namespace esphome {
             void disable_configuration_command();
             void read_fw_version();
             void read_serial_number();
+            void process_read_sn_ack(uint8_t* data);
 
             void apply_config();
             void start_auto_threshold_update();
