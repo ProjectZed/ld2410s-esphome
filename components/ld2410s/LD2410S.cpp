@@ -338,7 +338,7 @@ namespace esphome
                         // Check for header (need at least 4 bytes)
                         if (buf_pos >= 4 && !frame_started) {
                             uint32_t header = *reinterpret_cast<uint32_t*>(&buffer[buf_pos - 4]);
-                            if (header == FRAME_HEADER) {
+                            if (header == CMD_FRAME_HEADER) {
                                 frame_started = true;
                                 // Reset the buffer to keep only the header
                                 memmove(buffer, &buffer[buf_pos - 4], 4);
@@ -349,7 +349,7 @@ namespace esphome
                         // Check for footer (need header plus at least 4 more bytes)
                         if (frame_started && buf_pos >= 8) {
                             uint32_t footer = *reinterpret_cast<uint32_t*>(&buffer[buf_pos - 4]);
-                            if (footer == FRAME_FOOTER) {
+                            if (footer == CMD_FRAME_FOOTER) {
                                 // We have a complete frame
                                 break;
                             }
