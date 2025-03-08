@@ -12,7 +12,7 @@ namespace esphome
         {
             this->enable_configuration_command();
             this->read_fw_version();
-            // this->read_serial_number();
+            this->read_serial_number();
             // CmdFrameT read_config_cmd = this->prepare_read_config_cmd();
             // this->send_command(read_config_cmd);
             this->disable_configuration_command();
