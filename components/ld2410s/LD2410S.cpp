@@ -11,6 +11,7 @@ namespace esphome
         void LD2410S::setup() {
             this->enable_configuration_command();
             this->read_fw_version();
+            this->read_serial_number();
             CmdFrameT read_config_cmd = this->prepare_read_config_cmd();
             this->send_command(read_config_cmd);
             this->disable_configuration_command();
@@ -43,6 +44,11 @@ namespace esphome
         void LD2410S::read_fw_version() {
             CmdFrameT read_fw_cmd = this->build_cmd_frame(READ_FW_CMD, nullptr, 0);
             this->send_command(read_fw_cmd);
+        }
+
+        void LD2410S::read_serial_number() {
+            CmdFrameT read_sn_cmd = this->build_cmd_frame(READ_SN_CMD, nullptr, 0);
+            this->send_command(read_sn_cmd);
         }
 
         CmdFrameT build_cmd_frame(uint16_t command, uint8_t* data, size_t data_length) {
@@ -277,10 +283,11 @@ namespace esphome
             this->response_speed_select->publish_state(resp_speed == 5 ? RESPONSE_SPEED_NORMAL : RESPONSE_SPEED_FAST);
 #endif
             memcpy(&this->new_config, &this->current_config, sizeof(this->current_config));
-            ESP_LOGD(TAG, "Read config replay: max_dist=%d, min_dist=%d, delay=%d, status_resp_freq=%d, dist_resp_freq=%d, resp_speed=%d", max_dist, min_dist, delay, status_resp_freq, dist_resp_freq, resp_speed);
+            ESP_LOGD(TAG, "Read config reply: max_dist=%d, min_dist=%d, delay=%d, status_resp_freq=%d, dist_resp_freq=%d, resp_speed=%d", max_dist, min_dist, delay, status_resp_freq, dist_resp_freq, resp_speed);
         }
 
         void LD2410S::process_read_fw_ack(uint8_t* data) {
+            ESP_LOGD(TAG, "Read firmware DATA: %x", data);
             int major_v = static_cast<int>(data[0]);
             int minor_v = static_cast<int>(data[1]);
             int patch_v = static_cast<int>(data[2]);
@@ -288,7 +295,16 @@ namespace esphome
             for (auto& listener : this->listeners) {
                 listener->on_fw_version(version);
             }
-            ESP_LOGD(TAG, "Read firmware replay: %s", version.c_str());
+            ESP_LOGD(TAG, "Read firmware reply: %s", version.c_str());
+        }
+
+        void LD2410S::process_read_sn_ack(uint8_t* data) {
+            ESP_LOGD(TAG, "Read serial number DATA: %x", data);
+            std::string sn = std::string(data);
+            for (auto& listener : this->listeners) {
+                listener->on_sn(sn);
+            }
+            ESP_LOGD(TAG, "Read serial number reply: %s", sn.c_str());
         }
 
         bool LD2410S::process_cmd_ack_package(uint8_t* buffer, int len) {
@@ -306,23 +322,26 @@ namespace esphome
             uint8_t* data = ack.data;
 
             switch (command_word) {
-            case START_CONFIG_MODE_REPLAY:
+            case START_CONFIG_MODE_REPLY:
                 ESP_LOGD(TAG, "Config mode enabled");
                 break;
-            case END_CONFIG_MODE_REPLAY:
+            case END_CONFIG_MODE_REPLY:
                 ESP_LOGD(TAG, "Config mode disabled");
                 break;
             case READ_PARAMS_REPLAY:
                 this->process_config_read_ack(data);
                 break;
             case WRITE_PARAMS_REPLAY:
-                ESP_LOGD(TAG, "Write config replay processed");
+                ESP_LOGD(TAG, "Write config reply processed");
                 break;
-            case READ_FW_REPLAY:
+            case READ_FW_REPLY:
                 this->process_read_fw_ack(data);
                 break;
+            case READ_SN_REPLY:
+                this->process_read_sn_ack(data);
+                break;
             default:
-                ESP_LOGD(TAG, "Unknown replay: %x", command_word);
+                ESP_LOGD(TAG, "Unknown reply: %x", command_word);
                 break;
             }
 

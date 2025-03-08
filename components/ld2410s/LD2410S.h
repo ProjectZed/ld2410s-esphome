@@ -15,29 +15,34 @@
 
 namespace esphome {
     namespace ld2410s {
+        static const uint16_t START_CONFIG_MODE_CMD = 0x00FF;
+        static const uint8_t START_CONFIG_MODE_VALUE[] = {0x01, 0x00}; // 0x0001
+        static const uint16_t START_CONFIG_MODE_REPLY = 0x01FF;
+
+        static const uint16_t END_CONFIG_MODE_CMD = 0x00FE;
+        static const uint16_t END_CONFIG_MODE_REPLY = 0x01FE;
+
+        static const uint16_t READ_FW_CMD = 0x0000;
+        static const uint16_t READ_FW_REPLY = 0x0100;
+
+        static const uint16_t READ_SN_CMD = 0x0011;
+        static const uint16_t READ_SN_REPLY = 0x0111;
+
+
         // Short reporting format
         static const uint16_t DATA_FRAME_HEADER = 0x6E;
         static const uint16_t DATA_FRAME_FOOTER = 0x62;
 
         static const uint32_t CMD_FRAME_HEADER = 0xFAFBFCFD;
         static const uint32_t CMD_FRAME_FOOTER = 0x01020304;
+
         static const uint32_t THRESHOLD_HEADER = 0xF1F2F3F4;
         static const uint32_t THRESHOLD_FOOTER = 0xF5F6F7F8;
 
-        static const uint16_t READ_FW_CMD = 0x0000;
-        // static const uint16_t START_CONFIG_MODE_CMD = 0x00FF;
-        // static const uint16_t END_CONFIG_MODE_CMD = 0x00FE;
         static const uint16_t WRITE_PARAMS_CMD = 0x0070;
         static const uint16_t READ_PARAMS_CMD = 0x0071;
         static const uint16_t AUTO_UPDATE_THRESHOLD_CMD = 0x0009;
 
-
-        static const uint16_t START_CONFIG_MODE_CMD = 0x00FF;
-        static const uint8_t START_CONFIG_MODE_VALUE[] = {0x01, 0x00}; // 0x0001
-
-        static const uint16_t END_CONFIG_MODE_CMD = 0x00FE;
-
-        // static const uint16_t START_CONFIG_MODE_VALUE = 0x0001;
         static const uint16_t CFG_MAX_DETECTION_VALUE = 0x0005;
         static const uint16_t CFG_MIN_DETECTION_VALUE = 0x000A;
         static const uint16_t CFG_NO_DELAY_VALUE = 0x0006;
@@ -48,11 +53,8 @@ namespace esphome {
         static const uint16_t THRESHOLD_RETENTION_VALUE = 0x0001;
         static const uint16_t THRESHOLD_TIME_VALUE = 0x0078;
 
-        static const uint16_t START_CONFIG_MODE_REPLAY = 0x01FF;
-        static const uint16_t END_CONFIG_MODE_REPLAY = 0x01FE;
         static const uint16_t WRITE_PARAMS_REPLAY = 0x0170;
         static const uint16_t READ_PARAMS_REPLAY = 0x0171;
-        static const uint16_t READ_FW_REPLAY = 0x0100;
 
         static const std::string RESPONSE_SPEED_NORMAL = "Normal";
         static const std::string RESPONSE_SPEED_FAST = "Fast";
@@ -111,6 +113,7 @@ namespace esphome {
             void enable_configuration_command();
             void disable_configuration_command();
             void read_fw_version();
+            void read_serial_number();
 
             void apply_config();
             void start_auto_threshold_update();
