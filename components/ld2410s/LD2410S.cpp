@@ -6,9 +6,10 @@ namespace esphome
     namespace ld2410s
     {
 
-        static const char* TAG = "ld2410s";
+        static const char *TAG = "ld2410s";
 
-        void LD2410S::setup() {
+        void LD2410S::setup()
+        {
             this->enable_configuration_command();
             this->read_fw_version();
             // this->read_serial_number();
@@ -17,7 +18,8 @@ namespace esphome
             this->disable_configuration_command();
         }
 
-        void LD2410S::loop() {
+        void LD2410S::loop()
+        {
             // if (!this->cmd_active) {
             //     static uint8_t buffer[64];
             //     static size_t pos = 0;
@@ -31,79 +33,158 @@ namespace esphome
             // }
         }
 
-        void LD2410S::enable_configuration_command() {
+        void LD2410S::enable_configuration_command()
+        {
             CmdFrameT en_conf_cmd = this->build_cmd_frame(START_CONFIG_MODE_CMD, START_CONFIG_MODE_VALUE, 2);
             this->send_command(en_conf_cmd);
         }
 
-        void LD2410S::disable_configuration_command() {
+        void LD2410S::disable_configuration_command()
+        {
             CmdFrameT dis_conf_cmd = this->build_cmd_frame(END_CONFIG_MODE_CMD, nullptr, 0);
             this->send_command(dis_conf_cmd);
         }
 
-        void LD2410S::read_fw_version() {
+        void LD2410S::read_fw_version()
+        {
             CmdFrameT read_fw_cmd = this->build_cmd_frame(READ_FW_CMD, nullptr, 0);
             this->send_command(read_fw_cmd);
         }
 
-        void LD2410S::read_serial_number() {
+        void LD2410S::read_serial_number()
+        {
             CmdFrameT read_sn_cmd = this->build_cmd_frame(READ_SN_CMD, nullptr, 0);
             this->send_command(read_sn_cmd);
         }
 
-        CmdFrameT LD2410S::build_cmd_frame(uint16_t command, const uint8_t* data, uint16_t data_length) {
+        CmdFrameT LD2410S::build_cmd_frame(uint16_t command, const uint8_t *data, uint16_t data_length)
+        {
             CmdFrameT cmd_frame = {
                 .header = CMD_FRAME_HEADER,
                 .command = command,
                 .data_length = data_length,
-                .footer = CMD_FRAME_FOOTER
-            };
-            for (uint16_t i = 0; i < data_length; i++) {
+                .footer = CMD_FRAME_FOOTER};
+            for (uint16_t i = 0; i < data_length; i++)
+            {
                 cmd_frame.data[i] = data[i];
             }
             return cmd_frame;
         }
 
-        uint16_t frame_to_buffer(const CmdFrameT& frame, uint8_t* cmd_buffer, uint16_t buffer_size) {
+        uint16_t frame_to_buffer(const CmdFrameT &frame, uint8_t *cmd_buffer, uint16_t buffer_size)
+        {
             uint16_t pos = 0;
             uint16_t frame_data_bytes = frame.data_length + 2; // Command (2 bytes) + data
-            uint16_t total_required_size = sizeof(frame.header) + sizeof(frame.data_length) + 
-                                          sizeof(frame.command) + frame.data_length + sizeof(frame.footer);
-            
+            uint16_t total_required_size = sizeof(frame.header) + sizeof(frame.data_length) +
+                                           sizeof(frame.command) + frame.data_length + sizeof(frame.footer);
+
             // Check if buffer is large enough
-            if (buffer_size < total_required_size) {
+            if (buffer_size < total_required_size)
+            {
                 return 0; // Buffer too small
             }
-            
+
             // HEADER - direct assignment
-            uint32_t* header_ptr = reinterpret_cast<uint32_t*>(&cmd_buffer[pos]);
+            uint32_t *header_ptr = reinterpret_cast<uint32_t *>(&cmd_buffer[pos]);
             *header_ptr = frame.header;
             pos += sizeof(frame.header);
-            
+
             // SIZE - direct assignment
-            uint16_t* size_ptr = reinterpret_cast<uint16_t*>(&cmd_buffer[pos]);
+            uint16_t *size_ptr = reinterpret_cast<uint16_t *>(&cmd_buffer[pos]);
             *size_ptr = frame_data_bytes;
             pos += sizeof(frame.data_length);
-            
+
             // COMMAND - direct assignment
-            uint16_t* cmd_ptr = reinterpret_cast<uint16_t*>(&cmd_buffer[pos]);
+            uint16_t *cmd_ptr = reinterpret_cast<uint16_t *>(&cmd_buffer[pos]);
             *cmd_ptr = frame.command;
             pos += sizeof(frame.command);
-            
+
             // DATA - direct assignment in loop
-            for (uint16_t i = 0; i < frame.data_length; i++) {
+            for (uint16_t i = 0; i < frame.data_length; i++)
+            {
                 cmd_buffer[pos++] = frame.data[i];
             }
-            
+
             // FOOTER - direct assignment
-            uint32_t* footer_ptr = reinterpret_cast<uint32_t*>(&cmd_buffer[pos]);
+            uint32_t *footer_ptr = reinterpret_cast<uint32_t *>(&cmd_buffer[pos]);
             *footer_ptr = frame.footer;
             pos += sizeof(frame.footer);
-            
+
             return pos; // Return the actual buffer length
         }
 
-        void LD2410S::apply_config() {
+        void log_buffer(const char *prefix, const uint8_t *buffer, uint16_t length)
+        {
+            char log_buffer[256]; // Buffer for formatted log
+            char *log_ptr = log_buffer;
+            int remaining = sizeof(log_buffer);
+            int n;
+
+            // Format header with prefix
+            n = snprintf(log_ptr, remaining, "%s [", prefix);
+            log_ptr += n;
+            remaining -= n;
+
+            // Format each byte in hex
+            for (uint16_t i = 0; i < length && remaining > 0; i++)
+            {
+                n = snprintf(log_ptr, remaining, "%02X", buffer[i]);
+                log_ptr += n;
+                remaining -= n;
+
+                // Add separator except for last byte
+                if (i < length - 1 && remaining > 0)
+                {
+                    n = snprintf(log_ptr, remaining, " ");
+                    log_ptr += n;
+                    remaining -= n;
+                }
+            }
+
+            // Close the log message
+            if (remaining > 0)
+            {
+                snprintf(log_ptr, remaining, "]");
+            }
+
+            // Output the log
+            ESP_LOGI(TAG, "%s", log_buffer);
+        }
+
+        void log_command_frame(const CmdFrameT &frame, const uint8_t *cmd_buffer, uint16_t cmd_length)
+        {
+            // Log the buffer as hex values
+            log_buffer(TAG, "CMD:", cmd_buffer, cmd_length);
+
+            // Detailed structure logging
+            uint16_t frame_data_bytes = frame.data_length + 2;
+
+            ESP_LOGI(TAG, "  Header: 0x%08X", frame.header);
+            ESP_LOGI(TAG, "  Size: %u bytes", frame_data_bytes);
+            ESP_LOGI(TAG, "  Command: 0x%04X", frame.command);
+
+            if (frame.data_length > 0)
+            {
+                char data_log[128] = "  Data: ";
+                char *data_ptr = data_log + strlen(data_log);
+                int remaining = sizeof(data_log) - strlen(data_log);
+
+                for (uint16_t i = 0; i < frame.data_length && remaining > 0; i++)
+                {
+                    int n = snprintf(data_ptr, remaining, "%02X ", frame.data[i]);
+                    data_ptr += n;
+                    remaining -= n;
+                }
+
+                ESP_LOGI(TAG, "%s", data_log);
+            }
+
+            ESP_LOGI(TAG, "  Footer: 0x%08X", frame.footer);
+            ESP_LOGI(TAG, "  Total Length: %u bytes", cmd_length);
+        }
+
+        void LD2410S::apply_config()
+        {
             this->status_set_warning("Sending command to sensor");
             this->enable_configuration_command();
             CmdFrameT apply_config_cmd = this->prepare_apply_config_cmd();
@@ -112,7 +193,8 @@ namespace esphome
             this->status_clear_warning();
         }
 
-        void LD2410S::start_auto_threshold_update() {
+        void LD2410S::start_auto_threshold_update()
+        {
             this->status_set_warning("Sending command to sensor");
             this->enable_configuration_command();
             CmdFrameT threshold_update_cmd = this->prepare_threshold_cmd();
@@ -121,7 +203,8 @@ namespace esphome
             this->status_clear_warning();
         }
 
-        CmdFrameT LD2410S::prepare_read_config_cmd() {
+        CmdFrameT LD2410S::prepare_read_config_cmd()
+        {
             CmdFrameT cmd_frame;
             cmd_frame.header = CMD_FRAME_HEADER;
             cmd_frame.command = READ_PARAMS_CMD;
@@ -149,7 +232,8 @@ namespace esphome
             return cmd_frame;
         }
 
-        CmdFrameT LD2410S::prepare_apply_config_cmd() {
+        CmdFrameT LD2410S::prepare_apply_config_cmd()
+        {
             CmdFrameT cmd_frame;
             cmd_frame.header = CMD_FRAME_HEADER;
             cmd_frame.command = WRITE_PARAMS_CMD;
@@ -191,7 +275,8 @@ namespace esphome
             return cmd_frame;
         }
 
-        CmdFrameT LD2410S::prepare_threshold_cmd() {
+        CmdFrameT LD2410S::prepare_threshold_cmd()
+        {
             CmdFrameT cmd_frame;
             cmd_frame.header = CMD_FRAME_HEADER;
             cmd_frame.command = AUTO_UPDATE_THRESHOLD_CMD;
@@ -210,7 +295,8 @@ namespace esphome
             return cmd_frame;
         }
 
-        CmdFrameT LD2410S::prepare_read_fw_cmd() {
+        CmdFrameT LD2410S::prepare_read_fw_cmd()
+        {
             CmdFrameT cmd_frame;
             cmd_frame.header = CMD_FRAME_HEADER;
             cmd_frame.command = READ_FW_CMD;
@@ -221,13 +307,13 @@ namespace esphome
 
         void LD2410S::send_command(CmdFrameT frame)
         {
-            ESP_LOGD(TAG, "Sending command: %x", frame);
             this->cmd_active = true;
             uint32_t start_millis = millis();
             uint8_t retry = 3;
             uint8_t cmd_buffer[64];
             uint16_t cmd_length = frame_to_buffer(frame, cmd_buffer, sizeof(cmd_buffer));
-            if (cmd_length == 0) {
+            if (cmd_length == 0)
+            {
                 ESP_LOGD(TAG, "Command buffer too small");
                 this->cmd_active = false;
                 return;
@@ -235,18 +321,21 @@ namespace esphome
 
             while (retry)
             {
-                ESP_LOGD(TAG, "Sending command: %x", cmd_buffer);
+                log_command_frame(frame, cmd_buffer, cmd_length);
                 this->write_array(cmd_buffer, cmd_length);
                 this->flush();
 
                 bool reply = false;
 
-                while (!reply) {
+                while (!reply)
+                {
                     uint8_t ack_buffer[64];
                     size_t last_pos = 0;
-                    while (available()) {
+                    while (available())
+                    {
                         PackageType type = this->read_line(read(), ack_buffer, last_pos++);
-                        if (type == PackageType::ACK) {
+                        if (type == PackageType::ACK)
+                        {
                             reply = this->process_cmd_ack_package(ack_buffer, last_pos + 1);
                             last_pos = 0;
                         }
@@ -269,24 +358,30 @@ namespace esphome
             this->cmd_active = false;
         }
 
-        PackageType LD2410S::read_line(uint8_t data, uint8_t* buffer, size_t pos) {
+        PackageType LD2410S::read_line(uint8_t data, uint8_t *buffer, size_t pos)
+        {
             buffer[pos] = data;
 
-            if (pos > 4) {
-                if (memcmp(&buffer[pos - 3], &CMD_FRAME_FOOTER, sizeof(CMD_FRAME_FOOTER)) == 0) {
+            if (pos > 4)
+            {
+                if (memcmp(&buffer[pos - 3], &CMD_FRAME_FOOTER, sizeof(CMD_FRAME_FOOTER)) == 0)
+                {
                     return PackageType::ACK;
                 }
-                else if (buffer[pos] == DATA_FRAME_FOOTER && buffer[pos - 4] == DATA_FRAME_HEADER) {
+                else if (buffer[pos] == DATA_FRAME_FOOTER && buffer[pos - 4] == DATA_FRAME_HEADER)
+                {
                     return PackageType::SHORT_DATA;
                 }
-                else if (memcmp(&buffer[pos - 3], &THRESHOLD_FOOTER, sizeof(THRESHOLD_FOOTER)) == 0) {
+                else if (memcmp(&buffer[pos - 3], &THRESHOLD_FOOTER, sizeof(THRESHOLD_FOOTER)) == 0)
+                {
                     return PackageType::TRESHOLD;
                 }
             }
             return PackageType::UNKNOWN;
         }
 
-        void LD2410S::process_config_read_ack(uint8_t* data) {
+        void LD2410S::process_config_read_ack(uint8_t *data)
+        {
             int max_dist = this->read_int(data, 0, 4);
             int min_dist = this->read_int(data, 4, 4);
             int delay = this->read_int(data, 8, 4);
@@ -307,19 +402,22 @@ namespace esphome
             ESP_LOGD(TAG, "Read config reply: max_dist=%d, min_dist=%d, delay=%d, status_resp_freq=%d, dist_resp_freq=%d, resp_speed=%d", max_dist, min_dist, delay, status_resp_freq, dist_resp_freq, resp_speed);
         }
 
-        void LD2410S::process_read_fw_ack(uint8_t* data) {
+        void LD2410S::process_read_fw_ack(uint8_t *data)
+        {
             ESP_LOGD(TAG, "Read firmware DATA: %x", data);
             int major_v = static_cast<int>(data[0]);
             int minor_v = static_cast<int>(data[1]);
             int patch_v = static_cast<int>(data[2]);
             std::string version = "v" + std::to_string(major_v) + "." + std::to_string(minor_v) + "." + std::to_string(patch_v);
-            for (auto& listener : this->listeners) {
+            for (auto &listener : this->listeners)
+            {
                 listener->on_fw_version(version);
             }
             ESP_LOGD(TAG, "Read firmware reply: %s", version.c_str());
         }
 
-        void LD2410S::process_read_sn_ack(uint8_t* data) {
+        void LD2410S::process_read_sn_ack(uint8_t *data)
+        {
             ESP_LOGD(TAG, "Read serial number DATA: %x", data);
             // std::string sn = std::string(data);
             // for (auto& listener : this->listeners) {
@@ -328,21 +426,25 @@ namespace esphome
             // ESP_LOGD(TAG, "Read serial number reply: %s", sn.c_str());
         }
 
-        bool LD2410S::process_cmd_ack_package(uint8_t* buffer, int len) {
+        bool LD2410S::process_cmd_ack_package(uint8_t *buffer, int len)
+        {
             CmdAckT ack = this->parse_ack(buffer, len);
             int command_word = ack.command;
             bool result = ack.result;
-            if (!result) {
+            if (!result)
+            {
                 ESP_LOGW(TAG, "Command %x failed", command_word);
                 return false;
             }
-            else {
+            else
+            {
                 ESP_LOGI(TAG, "Command %x success", command_word);
             }
 
-            uint8_t* data = ack.data;
+            uint8_t *data = ack.data;
 
-            switch (command_word) {
+            switch (command_word)
+            {
             case START_CONFIG_MODE_REPLY:
                 ESP_LOGD(TAG, "Config mode enabled");
                 break;
@@ -369,31 +471,39 @@ namespace esphome
             return true;
         }
 
-        void LD2410S::process_short_data_package(uint8_t* data) {
+        void LD2410S::process_short_data_package(uint8_t *data)
+        {
             const bool presenceState = data[0] > 1;
             int distance = this->two_byte_to_int(data[1], data[2]);
-            for (auto& listener : this->listeners) {
+            for (auto &listener : this->listeners)
+            {
                 listener->on_presence(presenceState);
                 listener->on_distance(distance);
             }
         }
 
-        void LD2410S::process_threshold_package(uint8_t* data) {
+        void LD2410S::process_threshold_package(uint8_t *data)
+        {
             int progress = this->two_byte_to_int(data[3], data[4]);
-            for (auto& listener : this->listeners) {
-                if (progress == 100) {
+            for (auto &listener : this->listeners)
+            {
+                if (progress == 100)
+                {
                     listener->on_threshold_progress(0);
                     listener->on_threshold_update(false);
                 }
-                else {
+                else
+                {
                     listener->on_threshold_progress(progress);
                     listener->on_threshold_update(true);
                 }
             }
         }
 
-        void LD2410S::process_data_package(PackageType type, uint8_t* buffer, size_t pos) {
-            switch (type) {
+        void LD2410S::process_data_package(PackageType type, uint8_t *buffer, size_t pos)
+        {
+            switch (type)
+            {
             case PackageType::SHORT_DATA:
                 this->process_short_data_package(&buffer[1]);
                 break;
@@ -411,16 +521,20 @@ namespace esphome
             return setup_priority::HARDWARE;
         }
 
-        CmdAckT LD2410S::parse_ack(uint8_t* buffer, size_t length) {
+        CmdAckT LD2410S::parse_ack(uint8_t *buffer, size_t length)
+        {
             CmdAckT result;
             size_t start = -1;
-            for (size_t i = 0; i < length; i++) {
-                if (memcmp(&buffer[i], &CMD_FRAME_HEADER, sizeof(CMD_FRAME_HEADER)) == 0) {
+            for (size_t i = 0; i < length; i++)
+            {
+                if (memcmp(&buffer[i], &CMD_FRAME_HEADER, sizeof(CMD_FRAME_HEADER)) == 0)
+                {
                     start = i;
                     break;
                 }
             }
-            if (start == -1) {
+            if (start == -1)
+            {
                 ESP_LOGE(TAG, "Can't find cmd header");
                 result.result = false;
                 return result;
@@ -432,7 +546,8 @@ namespace esphome
             bool ack = buffer[start + 8] == 0x00 && buffer[start + 9] == 0x00;
             result.result = ack;
             // memcpy(&result.data, &buffer[start + 10], sizeof(uint8_t) * result.length);
-            for (size_t idx = 0; idx < result.length; idx++) {
+            for (size_t idx = 0; idx < result.length; idx++)
+            {
                 memcpy(&result.data[idx], &buffer[idx + 10], sizeof(buffer[idx + 10]));
             }
             return result;
