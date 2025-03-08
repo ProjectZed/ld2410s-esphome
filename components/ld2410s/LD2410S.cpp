@@ -375,6 +375,7 @@ namespace esphome
                 }
 
                 log_buffer("REPLY:", buffer, buf_pos);
+                retry = 0;
 
                 // bool reply = false;
 
