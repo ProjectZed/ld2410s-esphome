@@ -36,43 +36,43 @@ namespace esphome
 
         void LD2410S::enable_configuration_command()
         {
-            CmdFrameT en_conf_cmd = this->build_cmd_frame(START_CONFIG_MODE_CMD, START_CONFIG_MODE_VALUE);
+            CmdFrameT en_conf_cmd = this->build_cmd_frame(START_CONFIG_MODE_CMD, START_CONFIG_MODE_VALUE, 2);
             this->send_command(en_conf_cmd);
         }
 
         void LD2410S::disable_configuration_command()
         {
-            CmdFrameT dis_conf_cmd = this->build_cmd_frame(END_CONFIG_MODE_CMD, nullptr);
+            CmdFrameT dis_conf_cmd = this->build_cmd_frame(END_CONFIG_MODE_CMD, nullptr, 0);
             this->send_command(dis_conf_cmd);
         }
 
         void LD2410S::read_fw_version()
         {
-            CmdFrameT read_fw_cmd = this->build_cmd_frame(READ_FW_CMD, nullptr);
+            CmdFrameT read_fw_cmd = this->build_cmd_frame(READ_FW_CMD, nullptr, 0);
             this->send_command(read_fw_cmd);
         }
 
         void LD2410S::read_serial_number()
         {
-            CmdFrameT read_sn_cmd = this->build_cmd_frame(READ_SN_CMD, nullptr);
+            CmdFrameT read_sn_cmd = this->build_cmd_frame(READ_SN_CMD, nullptr, 0);
             this->send_command(read_sn_cmd);
         }
 
         void LD2410S::read_common_parameters()
         {
-            CmdFrameT read_config_cmd = this->build_cmd_frame(READ_PARAMS_CMD, READ_PARAMS_VALUE);
+            CmdFrameT read_config_cmd = this->build_cmd_frame(READ_PARAMS_CMD, READ_PARAMS_VALUE, 12);
             this->send_command(read_config_cmd);
         }
 
-        CmdFrameT LD2410S::build_cmd_frame(uint16_t command, const uint8_t *data)
+        CmdFrameT LD2410S::build_cmd_frame(uint16_t command, const uint8_t *data, uint16_t data_length)
         {
             CmdFrameT cmd_frame = {
                 .header = CMD_FRAME_HEADER,
-                .data_length = static_cast<uint16_t>(sizeof(data) + sizeof(command)),
+                .data_length = static_cast<uint16_t>(data_length + sizeof(command)),
                 .command = command,
                 .footer = CMD_FRAME_FOOTER,
             };
-            for (uint16_t i = 0; i < cmd_frame.data_length; i++)
+            for (uint16_t i = 0; i < data_length; i++)
             {
                 cmd_frame.data[i] = data[i];
             }
