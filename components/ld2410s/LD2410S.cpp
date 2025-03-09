@@ -156,7 +156,7 @@ namespace esphome
         {
             ESP_LOGI(TAG, "Command Frame");
             ESP_LOGI(TAG, "  Header: 0x%08X", frame.header);
-            ESP_LOGI(TAG, "  Data Length: %u bytes", frame.data_length;
+            ESP_LOGI(TAG, "  Data Length: %u bytes", frame.data_length);
             ESP_LOGI(TAG, "  Command: 0x%04X", frame.command);
 
             if (frame.data_length > 0)
@@ -165,7 +165,7 @@ namespace esphome
                 char *data_ptr = data_log + strlen(data_log);
                 int remaining = sizeof(data_log) - strlen(data_log);
 
-                for (uint16_t i = 0; i < frame.data_length - sizeof(frame.command)&& remaining > 0; i++)
+                for (uint16_t i = 0; i < frame.data_length - sizeof(frame.command) && remaining > 0; i++)
                 {
                     int n = snprintf(data_ptr, remaining, "%02X ", frame.data[i]);
                     data_ptr += n;
