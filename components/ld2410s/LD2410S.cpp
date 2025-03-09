@@ -11,10 +11,15 @@ namespace esphome
         void LD2410S::setup()
         {
             this->enable_configuration_command();
+            delay(100);
             this->read_fw_version();
+            delay(100);
             this->read_serial_number();
+            delay(100);
             this->read_common_parameters();
+            delay(100);
             this->read_threshold_parameters();
+            delay(100);
             // CmdFrameT read_config_cmd = this->prepare_read_config_cmd();
             // this->send_command(read_config_cmd);
             this->disable_configuration_command();
