@@ -371,7 +371,7 @@ namespace esphome
             uint16_t expected_total = min_size + cmd_ack.data_length;
             if (buffer_length < expected_total)
             {
-                ESP_LOGD(TAG, "Buffer too small: %d", buffer_length);
+                ESP_LOGE(TAG, "Buffer too small: %d", buffer_length);
                 return false;
             }
 
@@ -403,7 +403,7 @@ namespace esphome
             frame.length = frame_to_buffer(frame, cmd_buffer, sizeof(cmd_buffer));
             if (frame.length == 0)
             {
-                ESP_LOGD(TAG, "Command buffer too small");
+                ESP_LOGE(TAG, "Command buffer too small");
                 return;
             }
 
@@ -451,7 +451,7 @@ namespace esphome
                     // Prevent buffer overflow
                     if (buf_pos >= sizeof(buffer))
                     {
-                        ESP_LOGD(TAG, "Buffer too small: %d", buf_pos);
+                        ESP_LOGE(TAG, "Buffer too small: %d", buf_pos);
                         this->cmd_active = false;
                         return;
                     }
