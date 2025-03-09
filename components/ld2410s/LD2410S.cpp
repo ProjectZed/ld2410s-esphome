@@ -113,7 +113,7 @@ namespace esphome
 
                 if (buf_pos > 0 && is_different)
                 {
-                    memcpy(last_buffer, buffer, pos);
+                    memcpy(last_buffer, buffer, buf_pos);
                     log_buffer("SENSOR DATA:", buffer, buf_pos);
                 }
             }
