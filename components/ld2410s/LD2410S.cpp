@@ -94,9 +94,8 @@ namespace esphome
         uint16_t frame_to_buffer(const CmdFrameT &frame, uint8_t *cmd_buffer, uint16_t buffer_size)
         {
             uint16_t pos = 0;
-            uint16_t frame_data_bytes = frame.data_length + 2; // Command (2 bytes) + data
             uint16_t total_required_size = sizeof(frame.header) + sizeof(frame.data_length) +
-                                           sizeof(frame.command) + frame.data_length + sizeof(frame.footer);
+                                        frame.data_length + sizeof(frame.footer);
 
             // Check if buffer is large enough
             if (buffer_size < total_required_size)
@@ -111,7 +110,7 @@ namespace esphome
 
             // SIZE - direct assignment
             uint16_t *size_ptr = reinterpret_cast<uint16_t *>(&cmd_buffer[pos]);
-            *size_ptr = frame_data_bytes;
+            *size_ptr = frame.data_length;
             pos += sizeof(frame.data_length);
 
             // COMMAND - direct assignment
@@ -120,7 +119,7 @@ namespace esphome
             pos += sizeof(frame.command);
 
             // DATA - direct assignment in loop
-            for (uint16_t i = 0; i < frame.data_length; i++)
+            for (uint16_t i = 0; i < frame.data_length - sizeof(frame.command); i++)
             {
                 cmd_buffer[pos++] = frame.data[i];
             }
