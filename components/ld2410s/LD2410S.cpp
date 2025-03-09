@@ -11,12 +11,12 @@ namespace esphome
         void LD2410S::setup()
         {
             this->enable_configuration_command();
-            delay(100);
-            this->read_fw_version();
-            delay(100);
-            this->read_serial_number();
-            delay(100);
-            this->read_common_parameters();
+            // delay(100);
+            // this->read_fw_version();
+            // delay(100);
+            // this->read_serial_number();
+            // delay(100);
+            // this->read_common_parameters();
             delay(100);
             this->read_threshold_parameters();
             delay(100);
@@ -174,12 +174,12 @@ namespace esphome
         void log_command_frame(const CmdFrameT &frame)
         {
             char buffer[256];
-            char line_2[64];
-            char line_3[64];
-            char line_4[64];
-            char line_5[128];
-            char line_6[64];
-            char line_7[64];
+            char line_2[128];
+            char line_3[128];
+            char line_4[128];
+            char line_5[256];
+            char line_6[128];
+            char line_7[128];
         
             sprintf(line_2, "  Header: 0x%08X", frame.header);
             sprintf(line_3, "  Data Length: %u bytes", frame.data_length);
@@ -187,7 +187,7 @@ namespace esphome
         
             if (frame.data_length > 0)
             {
-                char data_log[128] = "  Data: ";
+                char data_log[256] = "  Data: ";
                 char *data_ptr = data_log + strlen(data_log);
                 int remaining = sizeof(data_log) - strlen(data_log);
         
