@@ -129,6 +129,7 @@ namespace esphome
                     PackageType type = this->read_line(read(), buffer, pos++);
                     if (type == PackageType::SHORT_DATA || type == PackageType::TRESHOLD)
                     {
+                        log_buffer(buffer, pos);
                         this->process_data_package(type, buffer, pos);
                         pos = 0;
                     }
