@@ -72,7 +72,7 @@ namespace esphome
                 .command = command,
                 .footer = CMD_FRAME_FOOTER,
             };
-            for (uint16_t i = 0; i < data_length; i++)
+            for (uint16_t i = 0; i < cmd_frame.data_length; i++)
             {
                 cmd_frame.data[i] = data[i];
             }
