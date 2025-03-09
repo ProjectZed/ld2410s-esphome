@@ -64,7 +64,7 @@ namespace esphome
             this->send_command(read_config_cmd);
         }
 
-        CmdFrameT LD2410S::build_cmd_frame(uint16_t command, const uint8_t *data, uint16_t data_length)
+        CmdFrameT LD2410S::build_cmd_frame(uint16_t command, const uint8_t *data, size_t data_length)
         {
             CmdFrameT cmd_frame = {
                 .header = CMD_FRAME_HEADER,
