@@ -79,7 +79,7 @@ namespace esphome {
             uint32_t header;
             uint16_t data_length;
             uint16_t command;
-            uint8_t data[64];
+            uint8_t data[128];
             uint32_t footer;
             uint16_t length;
         };
@@ -88,7 +88,7 @@ namespace esphome {
             uint32_t header;
             uint16_t data_length;
             uint16_t command;
-            uint8_t data[64] {0};
+            uint8_t data[128] {0};
             uint32_t footer;
             uint16_t length;
         };
