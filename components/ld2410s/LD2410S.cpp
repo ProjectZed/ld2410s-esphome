@@ -462,7 +462,6 @@ namespace esphome
                 return;
             }
 
-            ESP_LOGD(TAG, "Execution Time: %dms", millis() - start_millis);
             CmdAckT response;
             if (buffer_to_cmd_ack(buffer, buf_pos, response))
             {
@@ -473,6 +472,7 @@ namespace esphome
             {
                 ESP_LOGE(TAG, "Invalid response format");
             }
+            ESP_LOGD(TAG, "Execution Time: %dms", millis() - start_millis);
             this->cmd_active = false;
         }
 
