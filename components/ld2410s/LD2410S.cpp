@@ -61,9 +61,10 @@ namespace esphome
         {
             CmdFrameT cmd_frame = {
                 .header = CMD_FRAME_HEADER,
-                .command = command,
                 .data_length = data_length,
-                .footer = CMD_FRAME_FOOTER};
+                .command = command,
+                .footer = CMD_FRAME_FOOTER,
+            };
             for (uint16_t i = 0; i < data_length; i++)
             {
                 cmd_frame.data[i] = data[i];
