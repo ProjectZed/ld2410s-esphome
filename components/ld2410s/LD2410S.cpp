@@ -475,6 +475,8 @@ namespace esphome
                 return;
             }
 
+            log_buffer("Response:", buffer, buf_pos);
+
             CmdAckT response;
             if (buffer_to_cmd_ack(buffer, buf_pos, response))
             {
