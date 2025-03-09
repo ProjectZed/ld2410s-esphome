@@ -399,7 +399,7 @@ namespace esphome
         void LD2410S::send_command(CmdFrameT frame)
         {
             uint32_t start_millis = millis();
-            uint8_t cmd_buffer[64];
+            uint8_t cmd_buffer[128];
             frame.length = frame_to_buffer(frame, cmd_buffer, sizeof(cmd_buffer));
             if (frame.length == 0)
             {
@@ -412,7 +412,7 @@ namespace esphome
             this->write_array(cmd_buffer, frame.length);
             this->flush();
 
-            uint8_t buffer[64]; // Adjust size based on maximum expected response
+            uint8_t buffer[128]; // Adjust size based on maximum expected response
             uint16_t buf_pos = 0;
             uint32_t start_time = millis();
             bool frame_started = false;
