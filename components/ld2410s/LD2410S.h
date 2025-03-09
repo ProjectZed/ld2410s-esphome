@@ -15,6 +15,9 @@
 
 namespace esphome {
     namespace ld2410s {
+        static const uint32_t CMD_FRAME_HEADER = 0xFAFBFCFD;
+        static const uint32_t CMD_FRAME_FOOTER = 0x01020304;
+
         static const uint16_t START_CONFIG_MODE_CMD = 0x00FF;
         static const uint8_t START_CONFIG_MODE_VALUE[] = {0x01, 0x00}; // 0x0001
         static const uint16_t START_CONFIG_MODE_REPLY = 0x01FF;
@@ -33,8 +36,6 @@ namespace esphome {
         static const uint16_t DATA_FRAME_HEADER = 0x6E;
         static const uint16_t DATA_FRAME_FOOTER = 0x62;
 
-        static const uint32_t CMD_FRAME_HEADER = 0xFAFBFCFD;
-        static const uint32_t CMD_FRAME_FOOTER = 0x01020304;
 
         static const uint32_t THRESHOLD_HEADER = 0xF1F2F3F4;
         static const uint32_t THRESHOLD_FOOTER = 0xF5F6F7F8;
@@ -70,18 +71,19 @@ namespace esphome {
 
         struct CmdFrameT {
             uint32_t header;
-            uint16_t length;
+            uint16_t data_length;
             uint16_t command;
             uint8_t data[36];
-            uint16_t data_length;
             uint32_t footer;
+            uint16_t length;
         };
 
         struct CmdAckT {
-            uint16_t command{ 0 };
+            uint32_t header;
+            uint16_t data_length;
+            uint16_t command;
             uint8_t data[36];
-            uint16_t length{ 0 };
-            bool result{ false };
+            uint32_t footer;
         };
 
         enum class PackageType {
@@ -162,7 +164,7 @@ namespace esphome {
             CmdFrameT prepare_read_fw_cmd();
             void send_command(CmdFrameT cmd_frame);
             PackageType read_line(uint8_t data, uint8_t* buffer, size_t pos);
-            bool process_cmd_ack_package(uint8_t* buffer, int len);
+            // bool process_cmd_ack_package(uint8_t* buffer, int len);
             void process_data_package(PackageType type, uint8_t* buffer, size_t pos);
             int read_int(uint8_t* buffer, size_t pos, size_t len) {
                 unsigned int ret = 0;
@@ -174,7 +176,7 @@ namespace esphome {
                 return ret;
             };
             int two_byte_to_int(uint8_t firstbyte, uint8_t secondbyte) { return (secondbyte << 8) + firstbyte; };
-            CmdAckT parse_ack(uint8_t* buffer, size_t length);
+            // CmdAckT parse_ack(uint8_t* buffer, size_t length);
             void process_config_read_ack(uint8_t* data);
             void process_read_fw_ack(uint8_t* data);
             void process_short_data_package(uint8_t* data);

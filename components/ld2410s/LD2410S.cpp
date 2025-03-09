@@ -307,107 +307,134 @@ namespace esphome
 
         void LD2410S::send_command(CmdFrameT frame)
         {
-            this->cmd_active = true;
             uint32_t start_millis = millis();
-            uint8_t retry = 3;
             uint8_t cmd_buffer[64];
             uint16_t cmd_length = frame_to_buffer(frame, cmd_buffer, sizeof(cmd_buffer));
             if (cmd_length == 0)
             {
                 ESP_LOGD(TAG, "Command buffer too small");
+                return;
+            }
+
+            this->cmd_active = true;
+            log_command_frame(frame, cmd_buffer, cmd_length);
+            this->write_array(cmd_buffer, cmd_length);
+            this->flush();
+
+            uint8_t buffer[64]; // Adjust size based on maximum expected response
+            uint16_t buf_pos = 0;
+            uint32_t start_time = millis();
+            bool frame_started = false;
+            // State machine to read complete frame
+            while (millis() - start_time < 1000)
+            { // 1 second timeout
+                if (this->available())
+                {
+                    uint8_t byte = this->read();
+                    buffer[buf_pos++] = byte;
+
+                    // Check for header (need at least 4 bytes)
+                    if (buf_pos >= 4 && !frame_started)
+                    {
+                        uint32_t header = *reinterpret_cast<uint32_t *>(&buffer[buf_pos - 4]);
+                        if (header == CMD_FRAME_HEADER)
+                        {
+                            frame_started = true;
+                            // Reset the buffer to keep only the header
+                            memmove(buffer, &buffer[buf_pos - 4], 4);
+                            buf_pos = 4;
+                        }
+                    }
+
+                    // Check for footer (need header plus at least 4 more bytes)
+                    if (frame_started && buf_pos >= 8)
+                    {
+                        uint32_t footer = *reinterpret_cast<uint32_t *>(&buffer[buf_pos - 4]);
+                        if (footer == CMD_FRAME_FOOTER)
+                        {
+                            // We have a complete frame
+                            break;
+                        }
+                    }
+
+                    // Prevent buffer overflow
+                    if (buf_pos >= sizeof(buffer))
+                    {
+                        ESP_LOGD(TAG, "Buffer too small: %d", buf_pos);
+                        this->cmd_active = false;
+                        return;
+                    }
+
+                    // Reset timeout on each byte received
+                    start_time = millis();
+                }
+                yield(); // Allow background tasks
+            }
+
+            // Check if we timed out
+            if (millis() - start_time >= 1000)
+            {
                 this->cmd_active = false;
                 return;
             }
 
-            while (retry)
-            {
-                log_command_frame(frame, cmd_buffer, cmd_length);
-                this->write_array(cmd_buffer, cmd_length);
-                this->flush();
-
-                uint8_t buffer[64]; // Adjust size based on maximum expected response
-                uint16_t buf_pos = 0;
-                uint32_t start_time = millis();
-                bool frame_started = false;
-                // State machine to read complete frame
-                while (millis() - start_time < 1000) { // 1 second timeout
-                    if (this->available()) {
-                        uint8_t byte = this->read();
-                        buffer[buf_pos++] = byte;
-                        
-                        // Check for header (need at least 4 bytes)
-                        if (buf_pos >= 4 && !frame_started) {
-                            uint32_t header = *reinterpret_cast<uint32_t*>(&buffer[buf_pos - 4]);
-                            if (header == CMD_FRAME_HEADER) {
-                                frame_started = true;
-                                // Reset the buffer to keep only the header
-                                memmove(buffer, &buffer[buf_pos - 4], 4);
-                                buf_pos = 4;
-                            }
-                        }
-                        
-                        // Check for footer (need header plus at least 4 more bytes)
-                        if (frame_started && buf_pos >= 8) {
-                            uint32_t footer = *reinterpret_cast<uint32_t*>(&buffer[buf_pos - 4]);
-                            if (footer == CMD_FRAME_FOOTER) {
-                                // We have a complete frame
-                                break;
-                            }
-                        }
-                        
-                        // Prevent buffer overflow
-                        if (buf_pos >= sizeof(buffer)) {
-                            ESP_LOGD(TAG, "Buffer too small: %d", buf_pos);
-                            this->cmd_active = false;
-                            return;
-                        }
-                        
-                        // Reset timeout on each byte received
-                        start_time = millis();
-                    }
-                    yield(); // Allow background tasks
-                }
-                
-                // Check if we timed out
-                if (millis() - start_time >= 1000) {
-                    this->cmd_active = false;
-                    return;
-                }
-
-                log_buffer("REPLY:", buffer, buf_pos);
-                retry = 0;
-
-                // bool reply = false;
-
-                // while (!reply)
-                // {
-                //     uint8_t ack_buffer[64];
-                //     size_t last_pos = 0;
-                //     while (available())
-                //     {
-                //         PackageType type = this->read_line(read(), ack_buffer, last_pos++);
-                //         if (type == PackageType::ACK)
-                //         {
-                //             reply = this->process_cmd_ack_package(ack_buffer, last_pos + 1);
-                //             last_pos = 0;
-                //         }
-                //     }
-                //     delay_microseconds_safe(1450);
-                //     if ((millis() - start_millis) > 1000)
-                //     {
-                //         start_millis = millis();
-                //         retry--;
-                //         ESP_LOGD(TAG, "Retry: %d", retry);
-                //         break;
-                //     }
-                // }
-                // if (reply)
-                // {
-                //     retry = 0;
-                // }
-            }
             ESP_LOGD(TAG, "Execution time: %d", millis() - start_millis);
+            log_buffer("REPLY:", buffer, buf_pos);
+            CmdAckT response;
+            if (buffer_to_cmd_ack(buffer, length, response))
+            {
+                // Process the response
+                log_buffer("DATA:", response.data, response.data_length);
+            }
+            else
+            {
+                ESP_LOGE("LD2410S", "Invalid response format");
+            }
             this->cmd_active = false;
+        }
+
+        bool buffer_to_cmd_ack(const uint8_t *buffer, uint16_t buffer_length, CmdAckT &cmd_ack)
+        {
+            // Check minimum required length
+            uint16_t min_size = sizeof(uint32_t) + sizeof(uint16_t) + sizeof(uint16_t) + sizeof(uint32_t);
+            if (buffer_length < min_size)
+            {
+                return false; // Buffer too small
+            }
+
+            uint16_t pos = 0;
+
+            // Extract header using direct pointer casting
+            cmd_ack.header = *reinterpret_cast<const uint32_t *>(&buffer[pos]);
+            pos += sizeof(cmd_ack.header);
+
+            // Extract data length
+            cmd_ack.data_length = *reinterpret_cast<const uint16_t *>(&buffer[pos]);
+            pos += sizeof(cmd_ack.data_length);
+
+            // Validate buffer size
+            uint16_t expected_total = min_size + cmd_ack.data_length;
+            if (buffer_length < expected_total)
+            {
+                return false;
+            }
+
+            // Extract command
+            cmd_ack.command = *reinterpret_cast<const uint16_t *>(&buffer[pos]);
+            pos += sizeof(cmd_ack.command);
+
+            // Extract data
+            uint16_t data_to_copy = std::min(cmd_ack.data_length, static_cast<uint16_t>(sizeof(cmd_ack.data)));
+            if (data_to_copy > 0)
+            {
+                memcpy(cmd_ack.data, &buffer[pos], data_to_copy);
+            }
+            pos += cmd_ack.data_length;
+
+            // Extract footer
+            cmd_ack.footer = *reinterpret_cast<const uint32_t *>(&buffer[pos]);
+
+            return true;
         }
 
         PackageType LD2410S::read_line(uint8_t data, uint8_t *buffer, size_t pos)
@@ -478,51 +505,51 @@ namespace esphome
             // ESP_LOGD(TAG, "Read serial number reply: %s", sn.c_str());
         }
 
-        bool LD2410S::process_cmd_ack_package(uint8_t *buffer, int len)
-        {
-            CmdAckT ack = this->parse_ack(buffer, len);
-            int command_word = ack.command;
-            bool result = ack.result;
-            if (!result)
-            {
-                ESP_LOGE(TAG, "Command Failed: 0x%04X", command_word);
-                return false;
-            }
-            else
-            {
-                ESP_LOGI(TAG, "Command Success: 0x%04X", command_word);
-            }
+        // bool LD2410S::process_cmd_ack_package(uint8_t *buffer, int len)
+        // {
+        //     CmdAckT ack = this->parse_ack(buffer, len);
+        //     int command_word = ack.command;
+        //     bool result = ack.result;
+        //     if (!result)
+        //     {
+        //         ESP_LOGE(TAG, "Command Failed: 0x%04X", command_word);
+        //         return false;
+        //     }
+        //     else
+        //     {
+        //         ESP_LOGI(TAG, "Command Success: 0x%04X", command_word);
+        //     }
 
-            uint8_t *data = ack.data;
-            log_buffer("ACK:", data, sizeof(data));
+        //     uint8_t *data = ack.data;
+        //     log_buffer("ACK:", data, sizeof(data));
 
-            switch (command_word)
-            {
-            case START_CONFIG_MODE_REPLY:
-                ESP_LOGD(TAG, "Config mode enabled");
-                break;
-            case END_CONFIG_MODE_REPLY:
-                ESP_LOGD(TAG, "Config mode disabled");
-                break;
-            case READ_PARAMS_REPLAY:
-                this->process_config_read_ack(data);
-                break;
-            case WRITE_PARAMS_REPLAY:
-                ESP_LOGD(TAG, "Write config reply processed");
-                break;
-            case READ_FW_REPLY:
-                this->process_read_fw_ack(data);
-                break;
-            case READ_SN_REPLY:
-                this->process_read_sn_ack(data);
-                break;
-            default:
-                ESP_LOGD(TAG, "Unknown reply: %x", command_word);
-                break;
-            }
+        //     switch (command_word)
+        //     {
+        //     case START_CONFIG_MODE_REPLY:
+        //         ESP_LOGD(TAG, "Config mode enabled");
+        //         break;
+        //     case END_CONFIG_MODE_REPLY:
+        //         ESP_LOGD(TAG, "Config mode disabled");
+        //         break;
+        //     case READ_PARAMS_REPLAY:
+        //         this->process_config_read_ack(data);
+        //         break;
+        //     case WRITE_PARAMS_REPLAY:
+        //         ESP_LOGD(TAG, "Write config reply processed");
+        //         break;
+        //     case READ_FW_REPLY:
+        //         this->process_read_fw_ack(data);
+        //         break;
+        //     case READ_SN_REPLY:
+        //         this->process_read_sn_ack(data);
+        //         break;
+        //     default:
+        //         ESP_LOGD(TAG, "Unknown reply: %x", command_word);
+        //         break;
+        //     }
 
-            return true;
-        }
+        //     return true;
+        // }
 
         void LD2410S::process_short_data_package(uint8_t *data)
         {
@@ -574,36 +601,36 @@ namespace esphome
             return setup_priority::HARDWARE;
         }
 
-        CmdAckT LD2410S::parse_ack(uint8_t *buffer, size_t length)
-        {
-            CmdAckT result;
-            size_t start = -1;
-            for (size_t i = 0; i < length; i++)
-            {
-                if (memcmp(&buffer[i], &CMD_FRAME_HEADER, sizeof(CMD_FRAME_HEADER)) == 0)
-                {
-                    start = i;
-                    break;
-                }
-            }
-            if (start == -1)
-            {
-                ESP_LOGE(TAG, "Can't find cmd header");
-                result.result = false;
-                return result;
-            }
-            int data_length = this->two_byte_to_int(buffer[start + 4], buffer[start + 5]);
-            result.length = data_length;
-            int command_word = this->two_byte_to_int(buffer[start + 6], buffer[start + 7]);
-            result.command = command_word;
-            bool ack = buffer[start + 8] == 0x00 && buffer[start + 9] == 0x00;
-            result.result = ack;
-            // memcpy(&result.data, &buffer[start + 10], sizeof(uint8_t) * result.length);
-            for (size_t idx = 0; idx < result.length; idx++)
-            {
-                memcpy(&result.data[idx], &buffer[idx + 10], sizeof(buffer[idx + 10]));
-            }
-            return result;
-        }
+        // CmdAckT LD2410S::parse_ack(uint8_t *buffer, size_t length)
+        // {
+        //     CmdAckT result;
+        //     size_t start = -1;
+        //     for (size_t i = 0; i < length; i++)
+        //     {
+        //         if (memcmp(&buffer[i], &CMD_FRAME_HEADER, sizeof(CMD_FRAME_HEADER)) == 0)
+        //         {
+        //             start = i;
+        //             break;
+        //         }
+        //     }
+        //     if (start == -1)
+        //     {
+        //         ESP_LOGE(TAG, "Can't find cmd header");
+        //         result.result = false;
+        //         return result;
+        //     }
+        //     int data_length = this->two_byte_to_int(buffer[start + 4], buffer[start + 5]);
+        //     result.length = data_length;
+        //     int command_word = this->two_byte_to_int(buffer[start + 6], buffer[start + 7]);
+        //     result.command = command_word;
+        //     bool ack = buffer[start + 8] == 0x00 && buffer[start + 9] == 0x00;
+        //     result.result = ack;
+        //     // memcpy(&result.data, &buffer[start + 10], sizeof(uint8_t) * result.length);
+        //     for (size_t idx = 0; idx < result.length; idx++)
+        //     {
+        //         memcpy(&result.data[idx], &buffer[idx + 10], sizeof(buffer[idx + 10]));
+        //     }
+        //     return result;
+        // }
     }
 }
