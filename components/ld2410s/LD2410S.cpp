@@ -247,6 +247,7 @@ namespace esphome
                      ack.footer, ack.length);
                      
             ESP_LOGI(TAG, "%s", buffer);
+            delay(100);
         }
 
         void LD2410S::apply_config()
@@ -476,8 +477,6 @@ namespace esphome
                 this->cmd_active = false;
                 return;
             }
-
-            log_buffer("Response:", buffer, buf_pos);
 
             CmdAckT response;
             if (buffer_to_cmd_ack(buffer, buf_pos, response))
