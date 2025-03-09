@@ -21,6 +21,45 @@ namespace esphome
             this->disable_configuration_command();
         }
 
+        void log_buffer(const char *prefix, const uint8_t *buffer, uint16_t length)
+        {
+            char log_buffer[256]; // Buffer for formatted log
+            char *log_ptr = log_buffer;
+            int remaining = sizeof(log_buffer);
+            int n;
+
+            // Format header with prefix
+            n = snprintf(log_ptr, remaining, "%s [", prefix);
+            log_ptr += n;
+            remaining -= n;
+
+            // Format each byte in hex
+            for (uint16_t i = 0; i < length && remaining > 0; i++)
+            {
+                n = snprintf(log_ptr, remaining, "%02X", buffer[i]);
+                log_ptr += n;
+                remaining -= n;
+
+                // Add separator except for last byte
+                if (i < length - 1 && remaining > 0)
+                {
+                    n = snprintf(log_ptr, remaining, " ");
+                    log_ptr += n;
+                    remaining -= n;
+                }
+            }
+
+            // Close the log message
+            if (remaining > 0)
+            {
+                snprintf(log_ptr, remaining, "]");
+            }
+
+            // Output the log
+            ESP_LOGI(TAG, "%s", log_buffer);
+            delay(10);
+        }
+
         void LD2410S::loop()
         {
             if (!this->cmd_active && available())
@@ -184,45 +223,6 @@ namespace esphome
             pos += sizeof(frame.footer);
 
             return pos; // Return the actual buffer length
-        }
-
-        void log_buffer(const char *prefix, const uint8_t *buffer, uint16_t length)
-        {
-            char log_buffer[256]; // Buffer for formatted log
-            char *log_ptr = log_buffer;
-            int remaining = sizeof(log_buffer);
-            int n;
-
-            // Format header with prefix
-            n = snprintf(log_ptr, remaining, "%s [", prefix);
-            log_ptr += n;
-            remaining -= n;
-
-            // Format each byte in hex
-            for (uint16_t i = 0; i < length && remaining > 0; i++)
-            {
-                n = snprintf(log_ptr, remaining, "%02X", buffer[i]);
-                log_ptr += n;
-                remaining -= n;
-
-                // Add separator except for last byte
-                if (i < length - 1 && remaining > 0)
-                {
-                    n = snprintf(log_ptr, remaining, " ");
-                    log_ptr += n;
-                    remaining -= n;
-                }
-            }
-
-            // Close the log message
-            if (remaining > 0)
-            {
-                snprintf(log_ptr, remaining, "]");
-            }
-
-            // Output the log
-            ESP_LOGI(TAG, "%s", log_buffer);
-            delay(10);
         }
 
         void log_command_frame(const CmdFrameT &frame)
