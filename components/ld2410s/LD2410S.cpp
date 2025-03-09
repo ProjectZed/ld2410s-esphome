@@ -382,7 +382,7 @@ namespace esphome
             ESP_LOGD(TAG, "Execution time: %d", millis() - start_millis);
             log_buffer("REPLY:", buffer, buf_pos);
             CmdAckT response;
-            if (buffer_to_cmd_ack(buffer, length, response))
+            if (buffer_to_cmd_ack(buffer, buf_pos, response))
             {
                 // Process the response
                 log_buffer("DATA:", response.data, response.data_length);
