@@ -203,29 +203,36 @@ namespace esphome
 
         void log_command_ack(const CmdAckT &ack)
         {
-            ESP_LOGI(TAG, "Command Ack");
-            ESP_LOGI(TAG, "  Header: 0x%08X", ack.header);
-            ESP_LOGI(TAG, "  Data Length: %u bytes", ack.data_length);
-            ESP_LOGI(TAG, "  Command: 0x%04X", ack.command);
-
+            char buffer[512];
+            char line_data[128] = "";
+            
             if (ack.data_length > 0)
             {
-                char data_log[128] = "  Data: ";
-                char *data_ptr = data_log + strlen(data_log);
-                int remaining = sizeof(data_log) - strlen(data_log);
-
+                strcpy(line_data, "  Data: ");
+                char *data_ptr = line_data + strlen(line_data);
+                int remaining = sizeof(line_data) - strlen(line_data);
+        
                 for (uint16_t i = 0; i < ack.data_length - sizeof(ack.command) && remaining > 0; i++)
                 {
                     int n = snprintf(data_ptr, remaining, "%02X ", ack.data[i]);
                     data_ptr += n;
                     remaining -= n;
                 }
-
-                ESP_LOGI(TAG, "%s", data_log);
             }
-
-            ESP_LOGI(TAG, "  Footer: 0x%08X", ack.footer);
-            ESP_LOGI(TAG, "  Total Length: %u bytes", ack.length);
+            
+            snprintf(buffer, sizeof(buffer), 
+                     "Command Ack\n"
+                     "  Header: 0x%08X\n"
+                     "  Data Length: %u bytes\n"
+                     "  Command: 0x%04X\n"
+                     "%s%s"
+                     "  Footer: 0x%08X\n"
+                     "  Total Length: %u bytes",
+                     ack.header, ack.data_length, ack.command, 
+                     ack.data_length > 0 ? line_data : "", ack.data_length > 0 ? "\n" : "",
+                     ack.footer, ack.length);
+                     
+            ESP_LOGI(TAG, "%s", buffer);
         }
 
         void LD2410S::apply_config()
