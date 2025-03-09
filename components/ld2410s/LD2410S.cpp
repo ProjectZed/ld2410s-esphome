@@ -13,6 +13,7 @@ namespace esphome
             this->enable_configuration_command();
             this->read_fw_version();
             this->read_serial_number();
+            this->read_common_parameters();
             // CmdFrameT read_config_cmd = this->prepare_read_config_cmd();
             // this->send_command(read_config_cmd);
             this->disable_configuration_command();
@@ -57,11 +58,17 @@ namespace esphome
             this->send_command(read_sn_cmd);
         }
 
+        void LD2410S::read_common_parameters()
+        {
+            CmdFrameT read_config_cmd = this->build_cmd_frame(READ_PARAMS_CMD, READ_PARAMS_VALUE, 12);
+            this->send_command(read_config_cmd);
+        }
+
         CmdFrameT LD2410S::build_cmd_frame(uint16_t command, const uint8_t *data, uint16_t data_length)
         {
             CmdFrameT cmd_frame = {
                 .header = CMD_FRAME_HEADER,
-                .data_length = data_length + sizeof(command),
+                .data_length = static_cast<uint16_t>(data_length + sizeof(command)),
                 .command = command,
                 .footer = CMD_FRAME_FOOTER,
             };

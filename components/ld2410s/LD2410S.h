@@ -31,6 +31,9 @@ namespace esphome {
         static const uint16_t READ_SN_CMD = 0x0011;
         static const uint16_t READ_SN_REPLY = 0x0111;
 
+        static const uint16_t READ_PARAMS_CMD = 0x0071;
+        static const uint16_t READ_PARAMS_VALUE[] = {0x05, 0x00, 0x0A, 0x00, 0x06, 0x00, 0x02, 0x00, 0x0C, 0x00, 0x0B, 0x00};
+        static const uint16_t READ_PARAMS_REPLY = 0x0171;
 
         // Short reporting format
         static const uint16_t DATA_FRAME_HEADER = 0x6E;
@@ -41,7 +44,6 @@ namespace esphome {
         static const uint32_t THRESHOLD_FOOTER = 0xF5F6F7F8;
 
         static const uint16_t WRITE_PARAMS_CMD = 0x0070;
-        static const uint16_t READ_PARAMS_CMD = 0x0071;
         static const uint16_t AUTO_UPDATE_THRESHOLD_CMD = 0x0009;
 
         static const uint16_t CFG_MAX_DETECTION_VALUE = 0x0005;
@@ -119,6 +121,7 @@ namespace esphome {
             void disable_configuration_command();
             void read_fw_version();
             void read_serial_number();
+            void read_common_parameters();
             void process_read_sn_ack(uint8_t* data);
 
             void apply_config();
