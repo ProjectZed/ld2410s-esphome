@@ -306,6 +306,50 @@ namespace esphome
             return cmd_frame;
         }
 
+        bool buffer_to_cmd_ack(const uint8_t *buffer, uint16_t buffer_length, CmdAckT &cmd_ack)
+        {
+            // Check minimum required length
+            uint16_t min_size = sizeof(uint32_t) + sizeof(uint16_t) + sizeof(uint16_t) + sizeof(uint32_t);
+            if (buffer_length < min_size)
+            {
+                return false; // Buffer too small
+            }
+
+            uint16_t pos = 0;
+
+            // Extract header using direct pointer casting
+            cmd_ack.header = *reinterpret_cast<const uint32_t *>(&buffer[pos]);
+            pos += sizeof(cmd_ack.header);
+
+            // Extract data length
+            cmd_ack.data_length = *reinterpret_cast<const uint16_t *>(&buffer[pos]);
+            pos += sizeof(cmd_ack.data_length);
+
+            // Validate buffer size
+            uint16_t expected_total = min_size + cmd_ack.data_length;
+            if (buffer_length < expected_total)
+            {
+                return false;
+            }
+
+            // Extract command
+            cmd_ack.command = *reinterpret_cast<const uint16_t *>(&buffer[pos]);
+            pos += sizeof(cmd_ack.command);
+
+            // Extract data
+            uint16_t data_to_copy = std::min(cmd_ack.data_length, static_cast<uint16_t>(sizeof(cmd_ack.data)));
+            if (data_to_copy > 0)
+            {
+                memcpy(cmd_ack.data, &buffer[pos], data_to_copy);
+            }
+            pos += cmd_ack.data_length;
+
+            // Extract footer
+            cmd_ack.footer = *reinterpret_cast<const uint32_t *>(&buffer[pos]);
+
+            return true;
+        }
+
         void LD2410S::send_command(CmdFrameT frame)
         {
             uint32_t start_millis = millis();
@@ -392,50 +436,6 @@ namespace esphome
                 ESP_LOGE("LD2410S", "Invalid response format");
             }
             this->cmd_active = false;
-        }
-
-        bool buffer_to_cmd_ack(const uint8_t *buffer, uint16_t buffer_length, CmdAckT &cmd_ack)
-        {
-            // Check minimum required length
-            uint16_t min_size = sizeof(uint32_t) + sizeof(uint16_t) + sizeof(uint16_t) + sizeof(uint32_t);
-            if (buffer_length < min_size)
-            {
-                return false; // Buffer too small
-            }
-
-            uint16_t pos = 0;
-
-            // Extract header using direct pointer casting
-            cmd_ack.header = *reinterpret_cast<const uint32_t *>(&buffer[pos]);
-            pos += sizeof(cmd_ack.header);
-
-            // Extract data length
-            cmd_ack.data_length = *reinterpret_cast<const uint16_t *>(&buffer[pos]);
-            pos += sizeof(cmd_ack.data_length);
-
-            // Validate buffer size
-            uint16_t expected_total = min_size + cmd_ack.data_length;
-            if (buffer_length < expected_total)
-            {
-                return false;
-            }
-
-            // Extract command
-            cmd_ack.command = *reinterpret_cast<const uint16_t *>(&buffer[pos]);
-            pos += sizeof(cmd_ack.command);
-
-            // Extract data
-            uint16_t data_to_copy = std::min(cmd_ack.data_length, static_cast<uint16_t>(sizeof(cmd_ack.data)));
-            if (data_to_copy > 0)
-            {
-                memcpy(cmd_ack.data, &buffer[pos], data_to_copy);
-            }
-            pos += cmd_ack.data_length;
-
-            // Extract footer
-            cmd_ack.footer = *reinterpret_cast<const uint32_t *>(&buffer[pos]);
-
-            return true;
         }
 
         PackageType LD2410S::read_line(uint8_t data, uint8_t *buffer, size_t pos)
