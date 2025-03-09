@@ -116,7 +116,7 @@ namespace esphome {
 
             void register_listener(LD2410SListener* listener) { this->listeners.push_back(listener); };
 
-            CmdFrameT build_cmd_frame(uint16_t command, const uint8_t* data, uint16_t data_length);
+            CmdFrameT build_cmd_frame(uint16_t command, const uint8_t* data);
             void enable_configuration_command();
             void disable_configuration_command();
             void read_fw_version();

@@ -36,39 +36,39 @@ namespace esphome
 
         void LD2410S::enable_configuration_command()
         {
-            CmdFrameT en_conf_cmd = this->build_cmd_frame(START_CONFIG_MODE_CMD, START_CONFIG_MODE_VALUE, 2);
+            CmdFrameT en_conf_cmd = this->build_cmd_frame(START_CONFIG_MODE_CMD, START_CONFIG_MODE_VALUE);
             this->send_command(en_conf_cmd);
         }
 
         void LD2410S::disable_configuration_command()
         {
-            CmdFrameT dis_conf_cmd = this->build_cmd_frame(END_CONFIG_MODE_CMD, nullptr, 0);
+            CmdFrameT dis_conf_cmd = this->build_cmd_frame(END_CONFIG_MODE_CMD, nullptr);
             this->send_command(dis_conf_cmd);
         }
 
         void LD2410S::read_fw_version()
         {
-            CmdFrameT read_fw_cmd = this->build_cmd_frame(READ_FW_CMD, nullptr, 0);
+            CmdFrameT read_fw_cmd = this->build_cmd_frame(READ_FW_CMD, nullptr);
             this->send_command(read_fw_cmd);
         }
 
         void LD2410S::read_serial_number()
         {
-            CmdFrameT read_sn_cmd = this->build_cmd_frame(READ_SN_CMD, nullptr, 0);
+            CmdFrameT read_sn_cmd = this->build_cmd_frame(READ_SN_CMD, nullptr);
             this->send_command(read_sn_cmd);
         }
 
         void LD2410S::read_common_parameters()
         {
-            CmdFrameT read_config_cmd = this->build_cmd_frame(READ_PARAMS_CMD, READ_PARAMS_VALUE, 12);
+            CmdFrameT read_config_cmd = this->build_cmd_frame(READ_PARAMS_CMD, READ_PARAMS_VALUE);
             this->send_command(read_config_cmd);
         }
 
-        CmdFrameT LD2410S::build_cmd_frame(uint16_t command, const uint8_t *data, uint16_t data_length)
+        CmdFrameT LD2410S::build_cmd_frame(uint16_t command, const uint8_t *data)
         {
             CmdFrameT cmd_frame = {
                 .header = CMD_FRAME_HEADER,
-                .data_length = static_cast<uint16_t>(data_length + sizeof(command)),
+                .data_length = static_cast<uint16_t>(sizeof(data) + sizeof(command)),
                 .command = command,
                 .footer = CMD_FRAME_FOOTER,
             };
