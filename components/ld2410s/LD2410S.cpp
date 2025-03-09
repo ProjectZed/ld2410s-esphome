@@ -162,10 +162,10 @@ namespace esphome
         void log_command_frame(const CmdFrameT &frame)
         {
             char buffer[256];
-            char line_1 = "Command Frame";
-            char line_2 = sprintf("  Header: 0x%08X", frame.header);
-            char line_3 = sprintf("  Data Length: %u bytes", frame.data_length);
-            char line_4 = sprintf("  Command: 0x%04X", frame.command);
+            char* line_1 = "Command Frame";
+            char* line_2 = sprintf("  Header: 0x%08X", frame.header);
+            char* line_3 = sprintf("  Data Length: %u bytes", frame.data_length);
+            char* line_4 = sprintf("  Command: 0x%04X", frame.command);
 
             if (frame.data_length > 0)
             {
@@ -180,13 +180,13 @@ namespace esphome
                     remaining -= n;
                 }
 
-                char line_5 = sprintf("%s\n", data_log);
+                char* line_5 = sprintf("%s\n", data_log);
             } else {
-                char line_5 = "\n";
+                char* line_5 = "\n";
             }
 
-            char line_6 = sprintf("  Footer: 0x%08X", frame.footer);
-            char line_7 = sprintf("  Total Length: %u bytes", frame.length);
+            char* line_6 = sprintf("  Footer: 0x%08X", frame.footer);
+            char* line_7 = sprintf("  Total Length: %u bytes", frame.length);
             sprintf(buffer, "%s\n%s\n%s\n%s\n%s%s\n%s", line_1, line_2, line_3, line_4, line_5, line_6, line_7);
             ESP_LOGI(TAG, "%s", buffer);
         }
