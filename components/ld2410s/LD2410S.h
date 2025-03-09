@@ -35,6 +35,10 @@ namespace esphome {
         static const uint8_t READ_PARAMS_VALUE[] = {0x05, 0x00, 0x0A, 0x00, 0x06, 0x00, 0x02, 0x00, 0x0C, 0x00, 0x0B, 0x00};
         static const uint16_t READ_PARAMS_REPLY = 0x0171;
 
+        static const uint16_t READ_THRESHOLD_CMD = 0x0073;
+        static const uint8_t READ_THRESHOLD_VALUE[] = {0x00, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03, 0x00, 0x04, 0x00, 0x05, 0x00, 0x06, 0x00, 0x07, 0x00, 0x08, 0x00, 0x09, 0x00, 0x0A, 0x00, 0x0B, 0x00, 0x0C, 0x00, 0x0D, 0x00, 0x0E, 0x00, 0x0F, 0x00};
+        static const uint16_t READ_THRESHOLD_REPLY = 0x0173;
+        
         // Short reporting format
         static const uint16_t DATA_FRAME_HEADER = 0x6E;
         static const uint16_t DATA_FRAME_FOOTER = 0x62;
@@ -122,6 +126,7 @@ namespace esphome {
             void read_fw_version();
             void read_serial_number();
             void read_common_parameters();
+            void read_threshold_parameters();
             void process_read_sn_ack(uint8_t* data);
 
             void apply_config();

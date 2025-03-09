@@ -64,6 +64,12 @@ namespace esphome
             this->send_command(read_config_cmd);
         }
 
+        void LD2410S::read_threshold_parameters()
+        {
+            CmdFrameT read_threshold_cmd = this->build_cmd_frame(READ_THRESHOLD_CMD, READ_THRESHOLD_VALUE, 32);
+            this->send_command(read_threshold_cmd);
+        }
+
         CmdFrameT LD2410S::build_cmd_frame(uint16_t command, const uint8_t *data, size_t data_length)
         {
             CmdFrameT cmd_frame = {
