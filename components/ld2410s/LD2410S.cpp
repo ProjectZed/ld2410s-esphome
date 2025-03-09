@@ -154,6 +154,7 @@ namespace esphome
 
         void log_command_frame(const CmdFrameT &frame)
         {
+            ESP_LOGI(TAG, "Command Frame");
             ESP_LOGI(TAG, "  Header: 0x%08X", frame.header);
             ESP_LOGI(TAG, "  Data Length: %u bytes", frame.data_length);
             ESP_LOGI(TAG, "  Command: 0x%04X", frame.command);
@@ -180,6 +181,7 @@ namespace esphome
 
         void log_command_ack(const CmdAckT &ack)
         {
+            ESP_LOGI(TAG, "Command Ack");
             ESP_LOGI(TAG, "  Header: 0x%08X", ack.header);
             ESP_LOGI(TAG, "  Data Length: %u bytes", ack.data_length);
             ESP_LOGI(TAG, "  Command: 0x%04X", ack.command);
