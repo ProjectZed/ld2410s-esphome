@@ -472,7 +472,6 @@ namespace esphome
             {
                 ESP_LOGE(TAG, "Invalid response format");
             }
-            ESP_LOGD(TAG, "Execution Time: %dms", millis() - start_millis);
             this->cmd_active = false;
         }
 
