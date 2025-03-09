@@ -156,7 +156,7 @@ namespace esphome
         {
             ESP_LOGI(TAG, "Command Frame");
             ESP_LOGI(TAG, "  Header: 0x%08X", frame.header);
-            ESP_LOGI(TAG, "  Data Length: %u bytes", frame.data_length);
+            ESP_LOGI(TAG, "  Data Length: %u bytes", frame.data_length + sizeof(frame.command));
             ESP_LOGI(TAG, "  Command: 0x%04X", frame.command);
 
             if (frame.data_length > 0)
