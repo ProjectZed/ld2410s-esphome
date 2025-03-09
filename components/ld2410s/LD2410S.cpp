@@ -62,90 +62,77 @@ namespace esphome
 
         void LD2410S::loop()
         {
-            // if (!this->cmd_active && available())
-            // {
-            //     uint8_t buffer[128]; // Adjust size based on maximum expected response
-            //     uint16_t buf_pos = 0;
-            //     uint32_t start_time = millis();
-            //     bool frame_started = false;
-            //     // State machine to read complete frame
-            //     while (millis() - start_time < COMMAND_TIMEOUT)
-            //     { // 1 second timeout
-            //         uint8_t byte = this->read();
-            //         buffer[buf_pos++] = byte;
-
-            //         // Check for header (need at least 2 bytes)
-            //         if (buf_pos >= 2 && !frame_started)
-            //         {
-            //             uint32_t header = *reinterpret_cast<uint32_t *>(&buffer[buf_pos - 2]);
-            //             if (header == DATA_FRAME_HEADER)
-            //             {
-            //                 frame_started = true;
-            //                 // Reset the buffer to keep only the header
-            //                 memmove(buffer, &buffer[buf_pos - 2], 2);
-            //                 buf_pos = 2;
-            //             }
-            //         }
-
-            //         // Check for footer (need header plus at least 2 more bytes)
-            //         if (frame_started && buf_pos >= 4)
-            //         {
-            //             uint32_t footer = *reinterpret_cast<uint32_t *>(&buffer[buf_pos - 2]);
-            //             if (footer == DATA_FRAME_FOOTER)
-            //             {
-            //                 // We have a complete frame
-            //                 break;
-            //             }
-            //         }
-
-            //         // Prevent buffer overflow
-            //         if (buf_pos >= sizeof(buffer))
-            //         {
-            //             ESP_LOGE(TAG, "Buffer too small: %d", buf_pos);
-            //             this->cmd_active = false;
-            //             return;
-            //         }
-
-            //         // Reset timeout on each byte received
-            //         start_time = millis();
-            //     }
-
-            //     // Check if we timed out
-            //     if (millis() - start_time >= COMMAND_TIMEOUT)
-            //     {
-            //         ESP_LOGE(TAG, "Timeout waiting for response");
-            //         this->cmd_active = false;
-            //         return;
-            //     }
-
-            //     log_buffer("SENSOR DATA:", buffer, buf_pos);
-            // }
             if (!this->cmd_active)
             {
-                static uint8_t buffer[64];
-                static size_t pos = 0;
+                uint8_t buffer[128]; // Adjust size based on maximum expected response
+                uint16_t buf_pos = 0;
+                bool frame_started = false;
                 while (available())
                 {
-                    PackageType type = this->read_line(read(), buffer, pos++);
-                    if (type == PackageType::SHORT_DATA || type == PackageType::TRESHOLD)
+                    uint8_t byte = this->read();
+                    buffer[buf_pos++] = byte;
+
+                    // Check for header (need at least 2 bytes)
+                    if (buf_pos >= 2 && !frame_started)
                     {
-                        char logBuffer[128] = "Buffer: ";
-                        char *logPtr = logBuffer + strlen(logBuffer);
-                        int remaining = sizeof(logBuffer) - strlen(logBuffer);
-
-                        for (size_t i = 0; i < pos && remaining > 0; i++)
+                        uint32_t header = *reinterpret_cast<uint32_t *>(&buffer[buf_pos - 2]);
+                        if (header == DATA_FRAME_HEADER)
                         {
-                            int n = snprintf(logPtr, remaining, "%02X ", buffer[i]);
-                            logPtr += n;
-                            remaining -= n;
+                            frame_started = true;
+                            // Reset the buffer to keep only the header
+                            memmove(buffer, &buffer[buf_pos - 2], 2);
+                            buf_pos = 2;
                         }
+                    }
 
-                        ESP_LOGI(TAG, "%s", logBuffer);
-                        this->process_data_package(type, buffer, pos);
-                        pos = 0;
+                    // Check for footer (need header plus at least 2 more bytes)
+                    if (frame_started && buf_pos >= 4)
+                    {
+                        uint32_t footer = *reinterpret_cast<uint32_t *>(&buffer[buf_pos - 2]);
+                        if (footer == DATA_FRAME_FOOTER)
+                        {
+                            // We have a complete frame
+                            break;
+                        }
+                    }
+
+                    // Prevent buffer overflow
+                    if (buf_pos >= sizeof(buffer))
+                    {
+                        ESP_LOGE(TAG, "Buffer too small: %d", buf_pos);
+                        this->cmd_active = false;
+                        return;
                     }
                 }
+
+                log_buffer("SENSOR DATA:", buffer, buf_pos);
             }
+            // if (!this->cmd_active)
+            // {
+            //     static uint8_t buffer[64];
+            //     static size_t pos = 0;
+            //     while (available())
+            //     {
+            //         PackageType type = this->read_line(read(), buffer, pos++);
+            //         if (type == PackageType::SHORT_DATA || type == PackageType::TRESHOLD)
+            //         {
+            //             char logBuffer[128] = "Buffer: ";
+            //             char *logPtr = logBuffer + strlen(logBuffer);
+            //             int remaining = sizeof(logBuffer) - strlen(logBuffer);
+
+            //             for (size_t i = 0; i < pos && remaining > 0; i++)
+            //             {
+            //                 int n = snprintf(logPtr, remaining, "%02X ", buffer[i]);
+            //                 logPtr += n;
+            //                 remaining -= n;
+            //             }
+
+            //             ESP_LOGI(TAG, "%s", logBuffer);
+            //             this->process_data_package(type, buffer, pos);
+            //             pos = 0;
+            //         }
+            //     }
+            // }
         }
 
         void LD2410S::enable_configuration_command()
