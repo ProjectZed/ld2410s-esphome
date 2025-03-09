@@ -322,12 +322,12 @@ namespace esphome
             pos += sizeof(cmd_ack.command);
 
             // Extract data
-            uint16_t data_to_copy = cmd_ack.data_length - sizeof(uint16_t);
+            uint16_t data_to_copy = cmd_ack.data_length - sizeof(cmd_ack.command);
             if (data_to_copy > 0)
             {
                 memcpy(cmd_ack.data, &buffer[pos], data_to_copy);
             }
-            pos += cmd_ack.data_length;
+            pos += data_to_copy;
 
             // Extract footer
             cmd_ack.footer = *reinterpret_cast<const uint32_t *>(&buffer[pos]);
