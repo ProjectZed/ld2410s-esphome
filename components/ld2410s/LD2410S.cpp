@@ -161,10 +161,11 @@ namespace esphome
 
         void log_command_frame(const CmdFrameT &frame)
         {
-            ESP_LOGI(TAG, "Command Frame");
-            ESP_LOGI(TAG, "  Header: 0x%08X", frame.header);
-            ESP_LOGI(TAG, "  Data Length: %u bytes", frame.data_length);
-            ESP_LOGI(TAG, "  Command: 0x%04X", frame.command);
+            char buffer[256];
+            line_1 = "Command Frame";
+            line_2 = sprintf("  Header: 0x%08X", frame.header);
+            line_3 = sprintf("  Data Length: %u bytes", frame.data_length);
+            line_4 = sprintf("  Command: 0x%04X", frame.command);
 
             if (frame.data_length > 0)
             {
@@ -179,11 +180,15 @@ namespace esphome
                     remaining -= n;
                 }
 
-                ESP_LOGI(TAG, "%s", data_log);
+                line_5 = sprintf("%s\n", data_log);
+            } else {
+                line_5 = "\n";
             }
 
-            ESP_LOGI(TAG, "  Footer: 0x%08X", frame.footer);
-            ESP_LOGI(TAG, "  Total Length: %u bytes", frame.length);
+            line_6 = sprintf("  Footer: 0x%08X", frame.footer);
+            line_7 = sprintf("  Total Length: %u bytes", frame.length);
+            sprintf(buffer, "%s\n%s\n%s\n%s\n%s%s\n%s", line_1, line_2, line_3, line_4, line_5, line_6, line_7);
+            ESP_LOGI(TAG, "%s", buffer);
         }
 
         void log_command_ack(const CmdAckT &ack)
@@ -440,7 +445,7 @@ namespace esphome
                 return;
             }
 
-            ESP_LOGD(TAG, "Execution time: %d", millis() - start_millis);
+            ESP_LOGD(TAG, "Execution Time: %dms", millis() - start_millis);
             CmdAckT response;
             if (buffer_to_cmd_ack(buffer, buf_pos, response))
             {
