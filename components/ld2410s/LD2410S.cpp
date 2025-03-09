@@ -7,26 +7,80 @@ namespace esphome
     {
 
         static const char *TAG = "ld2410s";
+        ReadState currentState = IDLE;
+        unsigned long commandSentTime = 0;
+        const unsigned long COMMAND_TIMEOUT = 1000; // 1 second timeout
 
         void LD2410S::setup()
         {
             this->enable_configuration_command();
-            delay(100);
             this->read_fw_version();
-            delay(100);
             this->read_serial_number();
-            delay(100);
             this->read_common_parameters();
-            delay(100);
             this->read_threshold_parameters();
-            delay(100);
-            // CmdFrameT read_config_cmd = this->prepare_read_config_cmd();
-            // this->send_command(read_config_cmd);
             this->disable_configuration_command();
         }
 
         void LD2410S::loop()
         {
+            if (!this->cmd_active && available())
+            {
+                uint8_t buffer[128]; // Adjust size based on maximum expected response
+                uint16_t buf_pos = 0;
+                uint32_t start_time = millis();
+                bool frame_started = false;
+                // State machine to read complete frame
+                while (millis() - start_time < COMMAND_TIMEOUT)
+                { // 1 second timeout
+                    uint8_t byte = this->read();
+                    buffer[buf_pos++] = byte;
+
+                    // Check for header (need at least 2 bytes)
+                    if (buf_pos >= 2 && !frame_started)
+                    {
+                        uint32_t header = *reinterpret_cast<uint32_t *>(&buffer[buf_pos - 2]);
+                        if (header == DATA_FRAME_HEADER)
+                        {
+                            frame_started = true;
+                            // Reset the buffer to keep only the header
+                            memmove(buffer, &buffer[buf_pos - 2], 2);
+                            buf_pos = 2;
+                        }
+                    }
+
+                    // Check for footer (need header plus at least 2 more bytes)
+                    if (frame_started && buf_pos >= 4)
+                    {
+                        uint32_t footer = *reinterpret_cast<uint32_t *>(&buffer[buf_pos - 2]);
+                        if (footer == DATA_FRAME_FOOTER)
+                        {
+                            // We have a complete frame
+                            break;
+                        }
+                    }
+
+                    // Prevent buffer overflow
+                    if (buf_pos >= sizeof(buffer))
+                    {
+                        ESP_LOGE(TAG, "Buffer too small: %d", buf_pos);
+                        this->cmd_active = false;
+                        return;
+                    }
+
+                    // Reset timeout on each byte received
+                    start_time = millis();
+                }
+
+                // Check if we timed out
+                if (millis() - start_time >= COMMAND_TIMEOUT)
+                {
+                    ESP_LOGE(TAG, "Timeout waiting for response");
+                    this->cmd_active = false;
+                    return;
+                }
+
+                log_buffer("SENSOR DATA:", buffer, buf_pos);
+            }
             // if (!this->cmd_active) {
             //     static uint8_t buffer[64];
             //     static size_t pos = 0;
@@ -95,7 +149,7 @@ namespace esphome
         {
             uint16_t pos = 0;
             uint16_t total_required_size = sizeof(frame.header) + sizeof(frame.data_length) +
-                                        frame.data_length + sizeof(frame.footer);
+                                           frame.data_length + sizeof(frame.footer);
 
             // Check if buffer is large enough
             if (buffer_size < total_required_size)
@@ -168,7 +222,7 @@ namespace esphome
 
             // Output the log
             ESP_LOGI(TAG, "%s", log_buffer);
-            delay(100);
+            delay(10);
         }
 
         void log_command_frame(const CmdFrameT &frame)
@@ -180,17 +234,17 @@ namespace esphome
             char line_5[256];
             char line_6[128];
             char line_7[128];
-        
+
             sprintf(line_2, "  Header: 0x%08X", frame.header);
             sprintf(line_3, "  Data Length: %u bytes", frame.data_length);
             sprintf(line_4, "  Command: 0x%04X", frame.command);
-        
+
             if (frame.data_length > 0)
             {
                 char data_log[256] = "  Data: ";
                 char *data_ptr = data_log + strlen(data_log);
                 int remaining = sizeof(data_log) - strlen(data_log);
-        
+
                 for (uint16_t i = 0; i < frame.data_length - sizeof(frame.command) && remaining > 0; i++)
                 {
                     int n = snprintf(data_ptr, remaining, "%02X ", frame.data[i]);
@@ -198,33 +252,33 @@ namespace esphome
                     remaining -= n;
                 }
                 strcpy(line_5, data_log);
-            } 
-            else 
+            }
+            else
             {
                 strcpy(line_5, "");
             }
-        
+
             sprintf(line_6, "  Footer: 0x%08X", frame.footer);
             sprintf(line_7, "  Total Length: %u bytes", frame.length);
-            
-            snprintf(buffer, sizeof(buffer), "Command Frame\n%s\n%s\n%s\n%s\n%s\n%s", 
+
+            snprintf(buffer, sizeof(buffer), "Command Frame\n%s\n%s\n%s\n%s\n%s\n%s",
                      line_2, line_3, line_4, line_5, line_6, line_7);
-            
+
             ESP_LOGI(TAG, "%s", buffer);
-            delay(100);
+            delay(10);
         }
 
         void log_command_ack(const CmdAckT &ack)
         {
             char buffer[512];
             char line_data[128] = "";
-            
+
             if (ack.data_length > 0)
             {
                 strcpy(line_data, "  Data: ");
                 char *data_ptr = line_data + strlen(line_data);
                 int remaining = sizeof(line_data) - strlen(line_data);
-        
+
                 for (uint16_t i = 0; i < ack.data_length - sizeof(ack.command) && remaining > 0; i++)
                 {
                     int n = snprintf(data_ptr, remaining, "%02X ", ack.data[i]);
@@ -232,8 +286,8 @@ namespace esphome
                     remaining -= n;
                 }
             }
-            
-            snprintf(buffer, sizeof(buffer), 
+
+            snprintf(buffer, sizeof(buffer),
                      "Command Ack\n"
                      "  Header: 0x%08X\n"
                      "  Data Length: %u bytes\n"
@@ -241,12 +295,12 @@ namespace esphome
                      "%s%s"
                      "  Footer: 0x%08X\n"
                      "  Total Length: %u bytes",
-                     ack.header, ack.data_length, ack.command, 
+                     ack.header, ack.data_length, ack.command,
                      ack.data_length > 0 ? line_data : "", ack.data_length > 0 ? "\n" : "",
                      ack.footer, ack.length);
-                     
+
             ESP_LOGI(TAG, "%s", buffer);
-            delay(100);
+            delay(10);
         }
 
         void LD2410S::apply_config()
@@ -424,7 +478,7 @@ namespace esphome
             uint32_t start_time = millis();
             bool frame_started = false;
             // State machine to read complete frame
-            while (millis() - start_time < 1000)
+            while (millis() - start_time < COMMAND_TIMEOUT)
             { // 1 second timeout
                 if (this->available())
                 {
@@ -470,7 +524,7 @@ namespace esphome
             }
 
             // Check if we timed out
-            if (millis() - start_time >= 1000)
+            if (millis() - start_time >= COMMAND_TIMEOUT)
             {
                 ESP_LOGE(TAG, "Timeout waiting for response");
                 this->cmd_active = false;

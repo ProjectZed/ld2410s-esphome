@@ -93,6 +93,12 @@ namespace esphome {
             uint16_t length;
         };
 
+        enum ReadState {
+            IDLE,
+            WAITING_FOR_COMMAND_RESPONSE,
+            PROCESSING_SENSOR_DATA
+          };
+
         enum class PackageType {
             ACK,
             SHORT_DATA,
