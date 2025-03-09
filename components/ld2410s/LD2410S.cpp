@@ -37,7 +37,7 @@ namespace esphome
 
         void LD2410S::enable_configuration_command()
         {
-            CmdFrameT en_conf_cmd = this->build_cmd_frame(START_CONFIG_MODE_CMD, START_CONFIG_MODE_VALUE, 2);
+            CmdFrameT en_conf_cmd = this->build_cmd_frame(START_CONFIG_MODE_CMD, START_CONFIG_MODE_VALUE, sizeof(START_CONFIG_MODE_VALUE) / sizeof(START_CONFIG_MODE_VALUE[0]));
             this->send_command(en_conf_cmd);
         }
 
@@ -61,13 +61,13 @@ namespace esphome
 
         void LD2410S::read_common_parameters()
         {
-            CmdFrameT read_config_cmd = this->build_cmd_frame(READ_PARAMS_CMD, READ_PARAMS_VALUE, 12);
+            CmdFrameT read_config_cmd = this->build_cmd_frame(READ_PARAMS_CMD, READ_PARAMS_VALUE, sizeof(READ_PARAMS_VALUE) / sizeof(READ_PARAMS_VALUE[0]));
             this->send_command(read_config_cmd);
         }
 
         void LD2410S::read_threshold_parameters()
         {
-            CmdFrameT read_threshold_cmd = this->build_cmd_frame(READ_THRESHOLD_CMD, READ_THRESHOLD_VALUE, 32);
+            CmdFrameT read_threshold_cmd = this->build_cmd_frame(READ_THRESHOLD_CMD, READ_THRESHOLD_VALUE, sizeof(READ_THRESHOLD_VALUE) / sizeof(READ_THRESHOLD_VALUE[0]));
             this->send_command(read_threshold_cmd);
         }
 
