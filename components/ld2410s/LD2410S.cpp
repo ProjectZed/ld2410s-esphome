@@ -100,12 +100,14 @@ namespace esphome
                     if (buf_pos >= sizeof(buffer))
                     {
                         ESP_LOGE(TAG, "Buffer too small: %d", buf_pos);
-                        this->cmd_active = false;
                         return;
                     }
                 }
 
-                log_buffer("SENSOR DATA:", buffer, buf_pos);
+                if (buf_pos > 0)
+                {
+                    log_buffer("SENSOR DATA:", buffer, buf_pos);
+                }
             }
             // if (!this->cmd_active)
             // {
