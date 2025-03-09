@@ -162,32 +162,42 @@ namespace esphome
         void log_command_frame(const CmdFrameT &frame)
         {
             char buffer[256];
-            char* line_1 = "Command Frame";
-            char* line_2 = sprintf("  Header: 0x%08X", frame.header);
-            char* line_3 = sprintf("  Data Length: %u bytes", frame.data_length);
-            char* line_4 = sprintf("  Command: 0x%04X", frame.command);
-
+            char line_2[64];
+            char line_3[64];
+            char line_4[64];
+            char line_5[128];
+            char line_6[64];
+            char line_7[64];
+        
+            sprintf(line_2, "  Header: 0x%08X", frame.header);
+            sprintf(line_3, "  Data Length: %u bytes", frame.data_length);
+            sprintf(line_4, "  Command: 0x%04X", frame.command);
+        
             if (frame.data_length > 0)
             {
                 char data_log[128] = "  Data: ";
                 char *data_ptr = data_log + strlen(data_log);
                 int remaining = sizeof(data_log) - strlen(data_log);
-
+        
                 for (uint16_t i = 0; i < frame.data_length - sizeof(frame.command) && remaining > 0; i++)
                 {
                     int n = snprintf(data_ptr, remaining, "%02X ", frame.data[i]);
                     data_ptr += n;
                     remaining -= n;
                 }
-
-                char* line_5 = sprintf("%s\n", data_log);
-            } else {
-                char* line_5 = "\n";
+                strcpy(line_5, data_log);
+            } 
+            else 
+            {
+                strcpy(line_5, "");
             }
-
-            char* line_6 = sprintf("  Footer: 0x%08X", frame.footer);
-            char* line_7 = sprintf("  Total Length: %u bytes", frame.length);
-            sprintf(buffer, "%s\n%s\n%s\n%s\n%s%s\n%s", line_1, line_2, line_3, line_4, line_5, line_6, line_7);
+        
+            sprintf(line_6, "  Footer: 0x%08X", frame.footer);
+            sprintf(line_7, "  Total Length: %u bytes", frame.length);
+            
+            snprintf(buffer, sizeof(buffer), "Command Frame\n%s\n%s\n%s\n%s\n%s\n%s", 
+                     line_2, line_3, line_4, line_5, line_6, line_7);
+            
             ESP_LOGI(TAG, "%s", buffer);
         }
 
