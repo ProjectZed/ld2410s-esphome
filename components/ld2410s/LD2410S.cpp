@@ -129,7 +129,18 @@ namespace esphome
                     PackageType type = this->read_line(read(), buffer, pos++);
                     if (type == PackageType::SHORT_DATA || type == PackageType::TRESHOLD)
                     {
-                        log_buffer(buffer, pos);
+                        char logBuffer[128] = "Buffer: ";
+                        char *logPtr = logBuffer + strlen(logBuffer);
+                        int remaining = sizeof(logBuffer) - strlen(logBuffer);
+
+                        for (size_t i = 0; i < pos && remaining > 0; i++)
+                        {
+                            int n = snprintf(logPtr, remaining, "%02X ", buffer[i]);
+                            logPtr += n;
+                            remaining -= n;
+                        }
+
+                        ESP_LOGI(TAG, "%s", logBuffer);
                         this->process_data_package(type, buffer, pos);
                         pos = 0;
                     }
