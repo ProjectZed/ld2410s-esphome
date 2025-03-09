@@ -296,25 +296,9 @@ namespace esphome
             return cmd_frame;
         }
 
-        CmdFrameT LD2410S::prepare_read_fw_cmd()
-        {
-            CmdFrameT cmd_frame;
-            cmd_frame.header = CMD_FRAME_HEADER;
-            cmd_frame.command = READ_FW_CMD;
-            cmd_frame.data_length = 0;
-            cmd_frame.footer = CMD_FRAME_FOOTER;
-            return cmd_frame;
-        }
-
         bool buffer_to_cmd_ack(const uint8_t *buffer, uint16_t buffer_length, CmdAckT &cmd_ack)
         {
-            // Check minimum required length
-            uint16_t min_size = sizeof(uint32_t) + sizeof(uint16_t) + sizeof(uint16_t) + sizeof(uint32_t);
-            if (buffer_length < min_size)
-            {
-                return false; // Buffer too small
-            }
-
+            uint16_t min_size = sizeof(uint32_t) + sizeof(uint16_t) + sizeof(uint32_t);
             uint16_t pos = 0;
 
             // Extract header using direct pointer casting
@@ -329,6 +313,7 @@ namespace esphome
             uint16_t expected_total = min_size + cmd_ack.data_length;
             if (buffer_length < expected_total)
             {
+                ESP_LOGD(TAG, "Buffer too small: %d", buffer_length);
                 return false;
             }
 
@@ -337,7 +322,7 @@ namespace esphome
             pos += sizeof(cmd_ack.command);
 
             // Extract data
-            uint16_t data_to_copy = std::min(cmd_ack.data_length, static_cast<uint16_t>(sizeof(cmd_ack.data)));
+            uint16_t data_to_copy = std::min(cmd_ack.data_length - sizeof(cmd_ack.command), static_cast<uint16_t>(sizeof(cmd_ack.data)));
             if (data_to_copy > 0)
             {
                 memcpy(cmd_ack.data, &buffer[pos], data_to_copy);
@@ -520,10 +505,8 @@ namespace esphome
         //     {
         //         ESP_LOGI(TAG, "Command Success: 0x%04X", command_word);
         //     }
-
         //     uint8_t *data = ack.data;
         //     log_buffer("ACK:", data, sizeof(data));
-
         //     switch (command_word)
         //     {
         //     case START_CONFIG_MODE_REPLY:
@@ -548,7 +531,6 @@ namespace esphome
         //         ESP_LOGD(TAG, "Unknown reply: %x", command_word);
         //         break;
         //     }
-
         //     return true;
         // }
 

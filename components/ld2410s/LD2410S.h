@@ -161,7 +161,6 @@ namespace esphome {
             CmdFrameT prepare_read_config_cmd();
             CmdFrameT prepare_apply_config_cmd();
             CmdFrameT prepare_threshold_cmd();
-            CmdFrameT prepare_read_fw_cmd();
             void send_command(CmdFrameT cmd_frame);
             PackageType read_line(uint8_t data, uint8_t* buffer, size_t pos);
             // bool process_cmd_ack_package(uint8_t* buffer, int len);
