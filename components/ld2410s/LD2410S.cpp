@@ -60,6 +60,8 @@ namespace esphome
             delay(10);
         }
 
+        static uint8_t last_buffer[64];
+
         void LD2410S::loop()
         {
             if (!this->cmd_active)
@@ -67,9 +69,14 @@ namespace esphome
                 uint8_t buffer[128]; // Adjust size based on maximum expected response
                 uint16_t buf_pos = 0;
                 bool frame_started = false;
+                bool is_different = false;
                 while (available())
                 {
                     uint8_t byte = this->read();
+                    if (byte != last_buffer[buf_pos])
+                    {
+                        is_different = true;
+                    }
                     buffer[buf_pos++] = byte;
 
                     // Check for header (need at least 2 bytes)
@@ -104,8 +111,9 @@ namespace esphome
                     }
                 }
 
-                if (buf_pos > 0)
+                if (buf_pos > 0 && is_different)
                 {
+                    memcpy(last_buffer, buffer, pos);
                     log_buffer("SENSOR DATA:", buffer, buf_pos);
                 }
             }
