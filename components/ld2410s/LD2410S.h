@@ -84,6 +84,7 @@ namespace esphome {
             uint16_t command;
             uint8_t data[36];
             uint32_t footer;
+            uint16_t length;
         };
 
         enum class PackageType {

@@ -152,16 +152,10 @@ namespace esphome
             ESP_LOGI(TAG, "%s", log_buffer);
         }
 
-        void log_command_frame(const CmdFrameT &frame, const uint8_t *cmd_buffer, uint16_t cmd_length)
+        void log_command_frame(const CmdFrameT &frame)
         {
-            // Log the buffer as hex values
-            log_buffer("CMD:", cmd_buffer, cmd_length);
-
-            // Detailed structure logging
-            uint16_t frame_data_bytes = frame.data_length + 2;
-
             ESP_LOGI(TAG, "  Header: 0x%08X", frame.header);
-            ESP_LOGI(TAG, "  Size: %u bytes", frame_data_bytes);
+            ESP_LOGI(TAG, "  Data Length: %u bytes", frame.data_length);
             ESP_LOGI(TAG, "  Command: 0x%04X", frame.command);
 
             if (frame.data_length > 0)
@@ -181,7 +175,33 @@ namespace esphome
             }
 
             ESP_LOGI(TAG, "  Footer: 0x%08X", frame.footer);
-            ESP_LOGI(TAG, "  Total Length: %u bytes", cmd_length);
+            ESP_LOGI(TAG, "  Total Length: %u bytes", frame.length);
+        }
+
+        void log_command_ack(const CmdAckT &ack)
+        {
+            ESP_LOGI(TAG, "  Header: 0x%08X", ack.header);
+            ESP_LOGI(TAG, "  Data Length: %u bytes", ack.data_length);
+            ESP_LOGI(TAG, "  Command: 0x%04X", ack.command);
+
+            if (ack.data_length > 0)
+            {
+                char data_log[128] = "  Data: ";
+                char *data_ptr = data_log + strlen(data_log);
+                int remaining = sizeof(data_log) - strlen(data_log);
+
+                for (uint16_t i = 0; i < ack.data_length && remaining > 0; i++)
+                {
+                    int n = snprintf(data_ptr, remaining, "%02X ", ack.data[i]);
+                    data_ptr += n;
+                    remaining -= n;
+                }
+
+                ESP_LOGI(TAG, "%s", data_log);
+            }
+
+            ESP_LOGI(TAG, "  Footer: 0x%08X", ack.footer);
+            ESP_LOGI(TAG, "  Total Length: %u bytes", ack.length);
         }
 
         void LD2410S::apply_config()
@@ -332,6 +352,9 @@ namespace esphome
             // Extract footer
             cmd_ack.footer = *reinterpret_cast<const uint32_t *>(&buffer[pos]);
 
+            // Set length
+            cmd_ack.length = buffer_length;
+
             return true;
         }
 
@@ -339,16 +362,16 @@ namespace esphome
         {
             uint32_t start_millis = millis();
             uint8_t cmd_buffer[64];
-            uint16_t cmd_length = frame_to_buffer(frame, cmd_buffer, sizeof(cmd_buffer));
-            if (cmd_length == 0)
+            frame.length = frame_to_buffer(frame, cmd_buffer, sizeof(cmd_buffer));
+            if (frame.length == 0)
             {
                 ESP_LOGD(TAG, "Command buffer too small");
                 return;
             }
 
             this->cmd_active = true;
-            log_command_frame(frame, cmd_buffer, cmd_length);
-            this->write_array(cmd_buffer, cmd_length);
+            log_command_frame(frame);
+            this->write_array(cmd_buffer, frame.length);
             this->flush();
 
             uint8_t buffer[64]; // Adjust size based on maximum expected response
@@ -409,16 +432,15 @@ namespace esphome
             }
 
             ESP_LOGD(TAG, "Execution time: %d", millis() - start_millis);
-            log_buffer("REPLY:", buffer, buf_pos);
             CmdAckT response;
             if (buffer_to_cmd_ack(buffer, buf_pos, response))
             {
                 // Process the response
-                log_buffer("DATA:", response.data, response.data_length);
+                log_command_ack(response);
             }
             else
             {
-                ESP_LOGE("LD2410S", "Invalid response format");
+                ESP_LOGE(TAG, "Invalid response format");
             }
             this->cmd_active = false;
         }
