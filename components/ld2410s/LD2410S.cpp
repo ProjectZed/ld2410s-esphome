@@ -14,6 +14,7 @@ namespace esphome
             this->read_fw_version();
             this->read_serial_number();
             this->read_common_parameters();
+            this->read_threshold_parameters();
             // CmdFrameT read_config_cmd = this->prepare_read_config_cmd();
             // this->send_command(read_config_cmd);
             this->disable_configuration_command();
