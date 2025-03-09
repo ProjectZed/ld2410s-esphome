@@ -11,12 +11,12 @@ namespace esphome
         void LD2410S::setup()
         {
             this->enable_configuration_command();
-            // delay(100);
-            // this->read_fw_version();
-            // delay(100);
-            // this->read_serial_number();
-            // delay(100);
-            // this->read_common_parameters();
+            delay(100);
+            this->read_fw_version();
+            delay(100);
+            this->read_serial_number();
+            delay(100);
+            this->read_common_parameters();
             delay(100);
             this->read_threshold_parameters();
             delay(100);
@@ -169,6 +169,7 @@ namespace esphome
 
             // Output the log
             ESP_LOGI(TAG, "%s", log_buffer);
+            delay(100);
         }
 
         void log_command_frame(const CmdFrameT &frame)
@@ -211,6 +212,7 @@ namespace esphome
                      line_2, line_3, line_4, line_5, line_6, line_7);
             
             ESP_LOGI(TAG, "%s", buffer);
+            delay(100);
         }
 
         void log_command_ack(const CmdAckT &ack)
