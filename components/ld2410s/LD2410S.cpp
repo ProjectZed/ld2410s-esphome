@@ -465,6 +465,7 @@ namespace esphome
             // Check if we timed out
             if (millis() - start_time >= 1000)
             {
+                ESP_LOGE(TAG, "Timeout waiting for response");
                 this->cmd_active = false;
                 return;
             }
