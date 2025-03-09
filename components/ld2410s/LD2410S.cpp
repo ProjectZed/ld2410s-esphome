@@ -322,7 +322,7 @@ namespace esphome
             pos += sizeof(cmd_ack.command);
 
             // Extract data
-            uint16_t data_to_copy = std::min(cmd_ack.data_length - sizeof(cmd_ack.command), static_cast<uint16_t>(sizeof(cmd_ack.data)));
+            uint16_t data_to_copy = cmd_ack.data_length - sizeof(cmd_ack.command);
             if (data_to_copy > 0)
             {
                 memcpy(cmd_ack.data, &buffer[pos], data_to_copy);
