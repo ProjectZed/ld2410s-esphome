@@ -78,7 +78,6 @@ namespace esphome
                     log_buffer("Frame", frame->data, sizeof(frame->data));
                 }
             }
-            ESP_LOGI(TAG, "Processor Buffer Size: %d", sensor_processor.getBufferSize());
         }
 
         void LD2410S::enable_configuration_command()

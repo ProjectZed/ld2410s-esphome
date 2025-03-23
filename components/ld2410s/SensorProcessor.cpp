@@ -2,7 +2,6 @@
 #include <cstdint>
 #include <memory>
 #include <unordered_map>
-#include "esphome/core/log.h"
 
 namespace std {
     template<typename T, typename... Args>
@@ -25,92 +24,115 @@ struct HeaderFooter
 
 enum class ProcessorState
 {
-    WaitingForHeader,
-    ReadingData,
-    WaitingForFooter,
+    WaitingForHeaderStart,
+    WaitingForHeaderEnd,
+    WaitingForFooterStart,
+    WaitingForFooterEnd,
 };
 
 class SensorProcessor
 {
 public:
-    SensorProcessor(const std::unordered_map<uint8_t, HeaderFooter> &headerFooterMap) : headerFooterMap_(headerFooterMap) {}
+    SensorProcessor(const std::unordered_map<uint8_t, HeaderFooter> &headerFooterMap)
+        : headerFooterMap_(headerFooterMap) {}
 
     std::unique_ptr<Frame> processByte(uint8_t byte)
     {
-        buffer_.push_back(byte);
-        bufferSize_ += 1;
-        switch (state_)
-        {
-        case ProcessorState::WaitingForHeader:
+        if (state_ == ProcessorState::WaitingForHeaderStart)
         {
             for (const auto &pair : headerFooterMap_)
             {
                 const auto &type = pair.first;
                 const auto &headerFooter = pair.second;
                 const auto &header = headerFooter.header;
-                if (byte == header[bufferSize_ - 1])
+                if (byte == header[0])
                 {
-                    if (bufferSize_ == header.size())
+                    buffer_.push_back(byte);
+                    currentType_ = type;
+                    if (header.size() == 1)
                     {
-                        currentType_ = type;
-                        state_ = ProcessorState::ReadingData;
+                        state_ = ProcessorState::WaitingForFooterStart;
                     }
-                }
-                else
-                {
-                    reset();
+                    else
+                    {
+                        state_ = ProcessorState::WaitingForHeaderEnd;
+                    }
+                    return nullptr;
                 }
             }
-            break;
+            reset();
+            return nullptr;
         }
-        case ProcessorState::ReadingData:
+        else if (state_ == ProcessorState::WaitingForHeaderEnd)
+        {
+            const auto &header = headerFooterMap_.at(currentType_).header;
+            if (byte == header[buffer_.size()])
+            {
+                buffer_.push_back(byte);
+                if (buffer_.size() == header.size())
+                {
+                    state_ = ProcessorState::WaitingForFooterStart;
+                }
+                return nullptr;
+            }
+            reset();
+            return nullptr;
+        }
+        else if (state_ == ProcessorState::WaitingForFooterStart)
         {
             const auto &footer = headerFooterMap_.at(currentType_).footer;
             if (byte == footer[0])
             {
-                footerStartPos_ = bufferSize_ - 1;
-                state_ = ProcessorState::WaitingForFooter;
-                ESP_LOGI("SensorProcessor", "Footer Started: %d", currentType_);
+                footerStartPos_ = buffer_.size();
+                buffer_.push_back(byte);
+                if (footer.size() == 1)
+                {
+                    Frame frame{buffer_, currentType_};
+                    reset();
+                    return std::make_unique<Frame>(frame);
+                }
+                else
+                {
+                    state_ = ProcessorState::WaitingForFooterEnd;
+                }
             }
-            break;
+            return nullptr;
         }
-        case ProcessorState::WaitingForFooter:
+        else if (state_ == ProcessorState::WaitingForFooterEnd)
         {
             const auto &footer = headerFooterMap_.at(currentType_).footer;
-            if (bufferSize_ - footerStartPos_ == footer.size() && std::equal(footer.begin(), footer.end(), buffer_.begin() + footerStartPos_))
+            if (byte == footer[buffer_.size() - footerStartPos_])
             {
-                Frame frame{buffer_, currentType_};
-                buffer_.clear();
-                state_ = ProcessorState::WaitingForHeader;
-                return std::make_unique<Frame>(frame);
+                buffer_.push_back(byte);
+                if (buffer_.size() - footerStartPos_ == footer.size())
+                {
+                    Frame frame{buffer_, currentType_};
+                    reset();
+                    return std::make_unique<Frame>(frame);
+                }
             }
             else
             {
-                ESP_LOGI("SensorProcessor", "Footer Not Matched: %d", currentType_);
-                state_ = ProcessorState::ReadingData;
+                state_ = ProcessorState::WaitingForFooterStart;
             }
-            break;
-        }
+            return nullptr;
         }
         return nullptr;
     }
     
     ProcessorState getState() const { return state_; }
-    uint8_t getBufferSize() const { return bufferSize_; }
+    size_t getBufferSize() const { return buffer_.size(); }
     void reset()
     {
-        state_ = ProcessorState::WaitingForHeader;
-        buffer_.clear();
-        bufferSize_ = 0;
+        state_ = ProcessorState::WaitingForHeaderStart;
         footerStartPos_ = 0;
         currentType_ = 0;
     }
 
 private:
-    ProcessorState state_ = ProcessorState::WaitingForHeader;
+    ProcessorState state_ = ProcessorState::WaitingForHeaderStart;
     std::vector<uint8_t> buffer_;
-    uint8_t bufferSize_ = 0;
-    uint8_t footerStartPos_ = 0;
+    size_t footerStartPos_ = 0;
     uint8_t currentType_ = 0;
 
     const std::unordered_map<uint8_t, HeaderFooter> &headerFooterMap_;
