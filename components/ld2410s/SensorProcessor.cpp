@@ -3,6 +3,13 @@
 #include <memory>
 #include <unordered_map>
 
+namespace std {
+    template<typename T, typename... Args>
+    std::unique_ptr<T> make_unique(Args&&... args) {
+        return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+    }
+}
+
 struct Frame
 {
     std::vector<uint8_t> data;
@@ -49,10 +56,12 @@ std::unique_ptr<Frame> SensorProcessor::processByte(uint8_t byte)
     {
     case ProcessorState::WaitingForHeader:
     {
-        for (const auto &[type, headerFooter] : headerFooterMap_)
+        for (const auto &pair : headerFooterMap_)
         {
+            const auto &type = pair.first;
+            const auto &headerFooter = pair.second;
             const auto &header = headerFooter.header;
-            if (buffer_.size() == header.size() && std::equal(header.begin(), header.end(), buffer_.begin(), buffer_.end()))
+            if (buffer_.size() == header.size() && std::equal(header.begin(), header.end(), buffer_.begin()))
             {
                 currentType_ = type;
                 state_ = ProcessorState::ReadingData;
@@ -74,7 +83,7 @@ std::unique_ptr<Frame> SensorProcessor::processByte(uint8_t byte)
     case ProcessorState::WaitingForFooter:
     {
         const auto &footer = headerFooterMap_.at(currentType_).footer;
-        if (bufferSize_ - footerStartPos_ == footer.size() && std::equal(footer.begin(), footer.end(), buffer_.begin() + footerStartPos_, buffer_.end()))
+        if (bufferSize_ - footerStartPos_ == footer.size() && std::equal(footer.begin(), footer.end(), buffer_.begin() + footerStartPos_))
         {
             Frame frame{buffer_, currentType_};
             buffer_.clear();
@@ -88,7 +97,7 @@ std::unique_ptr<Frame> SensorProcessor::processByte(uint8_t byte)
         break;
     }
     }
-    return std::nullopt;
+    return nullptr;
 }
 
 void SensorProcessor::reset()
