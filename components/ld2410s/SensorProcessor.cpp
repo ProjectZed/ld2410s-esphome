@@ -96,6 +96,10 @@ public:
                     state_ = ProcessorState::WaitingForFooterEnd;
                 }
             }
+            else
+            {
+                buffer_.push_back(byte);
+            }
             return nullptr;
         }
         else if (state_ == ProcessorState::WaitingForFooterEnd)
@@ -113,6 +117,7 @@ public:
             }
             else
             {
+                buffer_.push_back(byte);
                 state_ = ProcessorState::WaitingForFooterStart;
             }
             return nullptr;

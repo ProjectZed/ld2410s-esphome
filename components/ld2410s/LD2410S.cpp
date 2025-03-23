@@ -51,8 +51,6 @@ namespace esphome
                     ss << " ";
                 }
             }
-
-            ss << std::endl;
             ESP_LOGI(TAG, "%s", ss.str().c_str());
         }
 
