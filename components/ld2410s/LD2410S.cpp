@@ -28,6 +28,31 @@ namespace esphome
             this->disable_configuration_command();
         }
 
+        void log_frame(const Frame &frame)
+        {
+            std::stringstream ss;
+
+            ss << "Frame [" << frame.data.size() << " bytes][" << frame.type << " type]:" << std::endl;
+
+            for (size_t i = 0; i < frame.data.size(); ++i)
+            {
+                // Format each byte as its hex value with leading zeros
+                ss << "0x" << std::hex << std::uppercase << std::setw(2)
+                   << std::setfill('0') << static_cast<int>(frame.data[i]);
+
+                // Reset to decimal for other output
+                ss << std::dec;
+
+                if (i < frame.data.size() - 1)
+                {
+                    ss << " ";
+                }
+            }
+
+            ss << std::endl;
+            ESP_LOG_I(TAG, "%s", ss.str().c_str());
+        }
+
         void log_buffer(const char *prefix, const std::vector<uint8_t> buffer, uint16_t length)
         {
             char log_buffer[256]; // Buffer for formatted log
@@ -75,7 +100,7 @@ namespace esphome
                 auto frame = sensor_processor.processByte(byte);
                 if (frame)
                 {
-                    log_buffer("Frame", frame->data, sizeof(frame->data));
+                    log_frame(*frame);
                 }
             }
         }
