@@ -91,6 +91,7 @@ public:
     }
     
     ProcessorState getState() const { return state_; }
+    uint8_t getBufferSize() const { return bufferSize_; }
     void reset()
     {
         state_ = ProcessorState::WaitingForHeader;
