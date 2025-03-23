@@ -28,6 +28,7 @@ enum class ProcessorState
 {
     WaitingForHeaderStart,
     WaitingForHeaderEnd,
+    WaitingForData,
     WaitingForFooterStart,
     WaitingForFooterEnd,
 };
@@ -47,13 +48,20 @@ public:
                 const auto &type = pair.first;
                 const auto &headerFooter = pair.second;
                 const auto &header = headerFooter.header;
+                const auto &minDataSize = headerDataFooterMap_.at(currentType_).minDataSize;
                 if (byte == header[0])
                 {
                     buffer_.push_back(byte);
                     currentType_ = type;
                     if (header.size() == 1)
                     {
-                        state_ = ProcessorState::WaitingForFooterStart;
+                        if (minDataSize == 0)
+                        {
+                            state_ = ProcessorState::WaitingForFooterStart;
+                        } else {
+                            dataStartpos_ = buffer_.size();
+                            state_ = ProcessorState::WaitingForData;
+                        }
                     }
                     else
                     {
@@ -68,16 +76,35 @@ public:
         else if (state_ == ProcessorState::WaitingForHeaderEnd)
         {
             const auto &header = headerDataFooterMap_.at(currentType_).header;
+            const auto &minDataSize = headerDataFooterMap_.at(currentType_).minDataSize;
             if (byte == header[buffer_.size()])
             {
                 buffer_.push_back(byte);
                 if (buffer_.size() == header.size())
                 {
-                    state_ = ProcessorState::WaitingForFooterStart;
+                    if (minDataSize == 0)
+                    {
+                        state_ = ProcessorState::WaitingForFooterStart;
+                    }
+                    else
+                    {
+                        state_ = ProcessorState::WaitingForData;
+                        dataStartpos_ = buffer_.size();
+                    }
                 }
                 return nullptr;
             }
             reset();
+            return nullptr;
+        }
+        else if (state_ == ProcessorState::WaitingForData)
+        {
+            buffer_.push_back(byte);
+            const auto &maxDataSize = headerDataFooterMap_.at(currentType_).maxDataSize;
+            if (buffer_.size() - dataStartpos_ == maxDataSize)
+            {
+                state_ = ProcessorState::WaitingForFooterStart;
+            }
             return nullptr;
         }
         else if (state_ == ProcessorState::WaitingForFooterStart)
@@ -133,6 +160,7 @@ public:
     {
         state_ = ProcessorState::WaitingForHeaderStart;
         buffer_.clear();
+        dataStartpos_ = 0;
         footerStartPos_ = 0;
         currentType_ = 0;
     }
@@ -141,6 +169,7 @@ private:
     ProcessorState state_ = ProcessorState::WaitingForHeaderStart;
     std::vector<uint8_t> buffer_;
     size_t footerStartPos_ = 0;
+    size_t dataStartpos_ = 0;
     uint8_t currentType_ = 0;
 
     const std::unordered_map<uint8_t, HeaderDataFooter> &headerDataFooterMap_;
