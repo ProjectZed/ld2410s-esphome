@@ -16,9 +16,11 @@ struct Frame
     uint8_t type;
 };
 
-struct HeaderFooter
+struct HeaderDataFooter
 {
     std::vector<uint8_t> header;
+    size_t minDataSize;
+    size_t maxDataSize;
     std::vector<uint8_t> footer;
 };
 
@@ -33,14 +35,14 @@ enum class ProcessorState
 class SensorProcessor
 {
 public:
-    SensorProcessor(const std::unordered_map<uint8_t, HeaderFooter> &headerFooterMap)
-        : headerFooterMap_(headerFooterMap) {}
+    SensorProcessor(const std::unordered_map<uint8_t, HeaderDataFooter> &headerDataFooterMap)
+        : headerDataFooterMap_(headerDataFooterMap) {}
 
     std::unique_ptr<Frame> processByte(uint8_t byte)
     {
         if (state_ == ProcessorState::WaitingForHeaderStart)
         {
-            for (const auto &pair : headerFooterMap_)
+            for (const auto &pair : headerDataFooterMap_)
             {
                 const auto &type = pair.first;
                 const auto &headerFooter = pair.second;
@@ -65,7 +67,7 @@ public:
         }
         else if (state_ == ProcessorState::WaitingForHeaderEnd)
         {
-            const auto &header = headerFooterMap_.at(currentType_).header;
+            const auto &header = headerDataFooterMap_.at(currentType_).header;
             if (byte == header[buffer_.size()])
             {
                 buffer_.push_back(byte);
@@ -80,7 +82,7 @@ public:
         }
         else if (state_ == ProcessorState::WaitingForFooterStart)
         {
-            const auto &footer = headerFooterMap_.at(currentType_).footer;
+            const auto &footer = headerDataFooterMap_.at(currentType_).footer;
             if (byte == footer[0])
             {
                 footerStartPos_ = buffer_.size();
@@ -104,7 +106,7 @@ public:
         }
         else if (state_ == ProcessorState::WaitingForFooterEnd)
         {
-            const auto &footer = headerFooterMap_.at(currentType_).footer;
+            const auto &footer = headerDataFooterMap_.at(currentType_).footer;
             if (byte == footer[buffer_.size() - footerStartPos_])
             {
                 buffer_.push_back(byte);
@@ -141,5 +143,5 @@ private:
     size_t footerStartPos_ = 0;
     uint8_t currentType_ = 0;
 
-    const std::unordered_map<uint8_t, HeaderFooter> &headerFooterMap_;
+    const std::unordered_map<uint8_t, HeaderDataFooter> &headerDataFooterMap_;
 };

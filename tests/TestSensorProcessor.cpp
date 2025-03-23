@@ -5,11 +5,11 @@
 
 SCENARIO("SensorProcessor processes bytes correctly", "[SensorProcessor]") {
     GIVEN("A SensorProcessor with a predefined headerFooterMap") {
-        std::unordered_map<uint8_t, HeaderFooter> headerFooterMap = {
-            {0x01, {{0x01, 0x02}, {0x03, 0x04}}},
-            {0x02, {{0x05}, {0x06}}},
+        std::unordered_map<uint8_t, HeaderDataFooter> headerDataFooterMap = {
+            {0x01, {{0x01, 0x02}, 0, 10, {0x03, 0x04}}},
+            {0x02, {{0x05}, 0, 10, {0x06}}},
         };
-        SensorProcessor sensorProcessor(headerFooterMap);
+        SensorProcessor sensorProcessor(headerDataFooterMap);
 
         REQUIRE(sensorProcessor.getState() == ProcessorState::WaitingForHeaderStart);
 

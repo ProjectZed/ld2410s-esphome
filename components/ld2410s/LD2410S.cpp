@@ -31,12 +31,12 @@ namespace esphome
         ReadState currentState = IDLE;
         unsigned long commandSentTime = 0;
         const unsigned long COMMAND_TIMEOUT = 1000; // 1 second timeout
-        const std::unordered_map<uint8_t, HeaderFooter> headerFooterMap = {
-            {0x00, {{0xFA, 0xFB, 0xFC, 0xFD}, {0x01, 0x02, 0x03, 0x04}}},
-            {0x01, {{0x6E}, {0x62}}},
-            {0x02, {{0xF1, 0xF2, 0xF3, 0xF4}, {0xF5, 0xF6, 0xF7, 0xF8}}},
+        const std::unordered_map<uint8_t, HeaderDataFooter> headerDataFooterMap = {
+            {0x00, {{0xFD, 0xFC, 0xFB, 0xFA}, 6, 72, {0x04, 0x03, 0x02, 0x01}}},  // Command Frames
+            {0x01, {{0x6E}, 3, 3, {0x62}}},  // Short Data Frames
+            {0x02, {{0xF4, 0xF3, 0xF2, 0xF1}, 5, 72, {0xF8, 0xF7, 0xF6, 0xF5}}},  // Long Data Frames
         };
-        SensorProcessor sensor_processor = SensorProcessor(headerFooterMap);
+        SensorProcessor sensor_processor = SensorProcessor(headerDataFooterMap);
 
         void LD2410S::setup()
         {
