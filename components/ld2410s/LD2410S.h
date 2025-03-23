@@ -156,7 +156,6 @@ namespace esphome {
         private:
             std::vector<LD2410SListener*> listeners{};
             Config current_config;
-            bool cmd_active{ false };
 #ifdef USE_NUMBER
             number::Number* max_distance_number{ nullptr };
             number::Number* min_distance_number{ nullptr };
