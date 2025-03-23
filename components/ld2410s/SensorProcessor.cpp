@@ -125,6 +125,7 @@ public:
     void reset()
     {
         state_ = ProcessorState::WaitingForHeaderStart;
+        buffer_.clear();
         footerStartPos_ = 0;
         currentType_ = 0;
     }
