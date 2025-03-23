@@ -78,10 +78,6 @@ namespace esphome
                 {
                     log_buffer("Frame", frame->data, sizeof(frame->data));
                 }
-                else
-                {
-                    ESP_LOGI(TAG, "No frame");
-                }
             }
             sensor_processor.reset();
         }
