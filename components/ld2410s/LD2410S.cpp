@@ -72,6 +72,7 @@ namespace esphome
             while (available())
             {
                 uint8_t byte = this->read();
+                ESP_LOGI(TAG, "Received byte: 0x%02X", byte);
                 auto frame = sensor_processor.processByte(byte);
                 if (frame)
                 {
@@ -79,7 +80,7 @@ namespace esphome
                 }
                 else
                 {
-                    ESP_LOGD(TAG, "No frame");
+                    ESP_LOGI(TAG, "No frame");
                 }
             }
         }
