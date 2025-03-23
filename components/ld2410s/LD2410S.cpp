@@ -11,7 +11,7 @@ namespace esphome
         ReadState currentState = IDLE;
         unsigned long commandSentTime = 0;
         const unsigned long COMMAND_TIMEOUT = 1000; // 1 second timeout
-        const headerFooterMap = {
+        const HeaderFooter headerFooterMap = {
             {ACK, {{0xFA, 0xFB, 0xFC, 0xFD}, {0x01, 0x02, 0x03, 0x04}}},
             {SHORT_DATA, {{0x6E}, {0x62}}},
             {TRESHOLD, {{0xF1, 0xF2, 0xF3, 0xF4}, {0xF5, 0xF6, 0xF7, 0xF8}}},
@@ -28,7 +28,7 @@ namespace esphome
             this->disable_configuration_command();
         }
 
-        void log_buffer(const char *prefix, const uint8_t *buffer, uint16_t length)
+        void log_buffer(const char *prefix, const std::vector<uint8_t> buffer, uint16_t length)
         {
             char log_buffer[256]; // Buffer for formatted log
             char *log_ptr = log_buffer;
@@ -73,7 +73,7 @@ namespace esphome
             {
                 uint8_t byte = this->read();
                 auto frame = sensor_processor.processByte(byte);
-                if (frame.has_value())
+                if (frame)
                 {
                     log_buffer("Frame", frame->data, sizeof(frame->data));
                 }
