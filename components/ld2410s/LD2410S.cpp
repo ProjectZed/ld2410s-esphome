@@ -72,7 +72,7 @@ namespace esphome
             while (available())
             {
                 uint8_t byte = this->read();
-                std::optional<Frame> frame = sensor_processor.processByte(byte);
+                auto frame = sensor_processor.processByte(byte);
                 if (frame.has_value())
                 {
                     log_buffer("Frame", frame->data, sizeof(frame->data));

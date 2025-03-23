@@ -1,6 +1,6 @@
 #include <vector>
 #include <cstdint>
-#include <optional>
+#include <memory>
 #include <unordered_map>
 
 struct Frame
@@ -27,7 +27,7 @@ class SensorProcessor
 public:
     SensorProcessor(const std::unordered_map<uint8_t, HeaderFooter> &headerFooterMap) : headerFooterMap_(headerFooterMap) {}
 
-    std::optional<Frame> processByte(uint8_t byte);
+    std::unique_ptr<Frame> processByte(uint8_t byte);
     ProcessorState getState() const { return state_; }
     void reset();
 
@@ -41,7 +41,7 @@ private:
     const std::unordered_map<uint8_t, HeaderFooter> &headerFooterMap_;
 };
 
-std::optional<Frame> SensorProcessor::processByte(uint8_t byte)
+std::unique_ptr<Frame> SensorProcessor::processByte(uint8_t byte)
 {
     buffer_.push_back(byte);
     bufferSize_ += 1;
@@ -79,7 +79,7 @@ std::optional<Frame> SensorProcessor::processByte(uint8_t byte)
             Frame frame{buffer_, currentType_};
             buffer_.clear();
             state_ = ProcessorState::WaitingForHeader;
-            return frame;
+            return std::make_unique<Frame>(frame);
         }
         else
         {
