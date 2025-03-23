@@ -11,10 +11,10 @@ namespace esphome
         ReadState currentState = IDLE;
         unsigned long commandSentTime = 0;
         const unsigned long COMMAND_TIMEOUT = 1000; // 1 second timeout
-        const HeaderFooter headerFooterMap = {
-            {ACK, {{0xFA, 0xFB, 0xFC, 0xFD}, {0x01, 0x02, 0x03, 0x04}}},
-            {SHORT_DATA, {{0x6E}, {0x62}}},
-            {TRESHOLD, {{0xF1, 0xF2, 0xF3, 0xF4}, {0xF5, 0xF6, 0xF7, 0xF8}}},
+        const std::unordered_map<uint8_t, HeaderFooter> headerFooterMap = {
+            {0x00, {{0xFA, 0xFB, 0xFC, 0xFD}, {0x01, 0x02, 0x03, 0x04}}},
+            {0x01, {{0x6E}, {0x62}}},
+            {0x02, {{0xF1, 0xF2, 0xF3, 0xF4}, {0xF5, 0xF6, 0xF7, 0xF8}}},
         };
         SensorProcessor sensor_processor = SensorProcessor(headerFooterMap);
 
