@@ -72,8 +72,8 @@ namespace esphome
             while (available())
             {
                 uint8_t byte = this->read();
-                ESP_LOGI(TAG, "Received byte: 0x%02X", byte);
                 auto frame = sensor_processor.processByte(byte);
+                ESP_LOGD(TAG, "Sensor Processor State: %d", sensor_processor.getState());
                 if (frame)
                 {
                     log_buffer("Frame", frame->data, sizeof(frame->data));
