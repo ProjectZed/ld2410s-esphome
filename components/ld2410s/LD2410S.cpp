@@ -110,7 +110,7 @@ namespace esphome
             delay(10);
         }
 
-        const Frame lastFrame = {std::vector<uint8_t>(), 0};
+        Frame lastFrame = {std::vector<uint8_t>(), 0};
 
         void LD2410S::loop()
         {
