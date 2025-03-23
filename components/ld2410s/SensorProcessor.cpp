@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <memory>
 #include <unordered_map>
+#include "esphome/core/log.h"
 
 namespace std {
     template<typename T, typename... Args>
