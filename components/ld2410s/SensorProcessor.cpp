@@ -48,11 +48,13 @@ public:
                 const auto &type = pair.first;
                 const auto &headerFooter = pair.second;
                 const auto &header = headerFooter.header;
-                if (buffer_.size() == header.size() && std::equal(header.begin(), header.end(), buffer_.begin()))
+                if (byte == header[bufferSize_])
                 {
-                    currentType_ = type;
-                    state_ = ProcessorState::ReadingData;
-                    ESP_LOGI("SensorProcessor", "Header Matched: %d", currentType_);
+                    if (bufferSize_ == header.size())
+                    {
+                        currentType_ = type;
+                        state_ = ProcessorState::ReadingData;
+                    }
                 }
                 else
                 {
