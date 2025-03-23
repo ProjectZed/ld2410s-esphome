@@ -71,6 +71,18 @@
         "format": "cpp",
         "istream": "cpp",
         "iomanip": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "__bit_reference": "cpp",
+        "__config": "cpp",
+        "__split_buffer": "cpp",
+        "__verbose_abort": "cpp",
+        "bitset": "cpp",
+        "fstream": "cpp",
+        "future": "cpp",
+        "iostream": "cpp",
+        "set": "cpp",
+        "stack": "cpp",
+        "string_view": "cpp",
+        "variant": "cpp"
     }
 }
