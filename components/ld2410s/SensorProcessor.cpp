@@ -48,7 +48,7 @@ public:
                 const auto &type = pair.first;
                 const auto &headerFooter = pair.second;
                 const auto &header = headerFooter.header;
-                if (byte == header[bufferSize_])
+                if (byte == header[bufferSize_ - 1])
                 {
                     if (bufferSize_ == header.size())
                     {
