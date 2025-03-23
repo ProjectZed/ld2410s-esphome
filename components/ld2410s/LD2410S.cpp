@@ -9,6 +9,23 @@ namespace esphome
 {
     namespace ld2410s
     {
+        template <typename T>
+        bool areVectorsDifferent(const std::vector<T>& vec1, const std::vector<T>& vec2) {
+            // Quick check: if sizes are different, vectors are different
+            if (vec1.size() != vec2.size()) {
+                return true;
+            }
+            
+            // Compare each element
+            for (size_t i = 0; i < vec1.size(); ++i) {
+                if (vec1[i] != vec2[i]) {
+                    return true;  // Found a difference
+                }
+            }
+            
+            // No differences found
+            return false;
+        }
 
         static const char *TAG = "ld2410s";
         ReadState currentState = IDLE;
@@ -35,7 +52,7 @@ namespace esphome
         {
             std::stringstream ss;
 
-            ss << "Frame [" << frame.data.size() << " bytes][" << frame.type << " type]:" << std::endl;
+            ss << "Frame [" << frame.data.size() << " bytes][" << std::to_string(frame.type) << " type]:" << std::endl;
 
             for (size_t i = 0; i < frame.data.size(); ++i)
             {
@@ -93,6 +110,8 @@ namespace esphome
             delay(10);
         }
 
+        const Frame lastFrame;
+
         void LD2410S::loop()
         {
             while (available())
@@ -101,7 +120,12 @@ namespace esphome
                 auto frame = sensor_processor.processByte(byte);
                 if (frame)
                 {
-                    log_frame(*frame);
+                    if (lastFrame)
+                    {
+                        if (areVectorsDifferent(lastFrame.data, frame->data)) {
+                            log_frame(*frame);
+                        }
+                    }
                 }
             }
         }
