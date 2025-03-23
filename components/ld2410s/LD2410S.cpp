@@ -53,7 +53,7 @@ namespace esphome
             }
 
             ss << std::endl;
-            ESP_LOG_I(TAG, "%s", ss.str().c_str());
+            ESP_LOGI(TAG, "%s", ss.str().c_str());
         }
 
         void log_buffer(const char *prefix, const std::vector<uint8_t> buffer, uint16_t length)
