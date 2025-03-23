@@ -83,6 +83,7 @@ namespace esphome
                     ESP_LOGI(TAG, "No frame");
                 }
             }
+            sensor_processor.reset();
         }
 
         void LD2410S::enable_configuration_command()
