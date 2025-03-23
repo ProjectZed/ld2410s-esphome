@@ -34,7 +34,7 @@ class SensorProcessor
 public:
     SensorProcessor(const std::unordered_map<uint8_t, HeaderFooter> &headerFooterMap) : headerFooterMap_(headerFooterMap) {}
 
-    std::unique_ptr<Frame> SensorProcessor::processByte(uint8_t byte)
+    std::unique_ptr<Frame> processByte(uint8_t byte)
     {
         buffer_.push_back(byte);
         bufferSize_ += 1;
