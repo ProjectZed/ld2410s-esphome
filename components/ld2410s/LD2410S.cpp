@@ -77,6 +77,10 @@ namespace esphome
                 {
                     log_buffer("Frame", frame->data, sizeof(frame->data));
                 }
+                else
+                {
+                    ESP_LOGD(TAG, "No frame");
+                }
             }
         }
 
