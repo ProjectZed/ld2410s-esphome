@@ -121,6 +121,7 @@ namespace esphome
                 if (frame && areVectorsDifferent(lastFrame.data, frame->data))
                 {
                     log_frame(*frame);
+                    lastFrame = *frame;
                 }
             }
         }
