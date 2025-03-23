@@ -51,6 +51,7 @@ public:
                 {
                     currentType_ = type;
                     state_ = ProcessorState::ReadingData;
+                    ESP_LOGI("SensorProcessor", "Header Matched: %d", currentType_);
                     break;
                 }
             }
@@ -63,6 +64,7 @@ public:
             {
                 footerStartPos_ = bufferSize_ - 1;
                 state_ = ProcessorState::WaitingForFooter;
+                ESP_LOGI("SensorProcessor", "Footer Started: %d", currentType_);
             }
             break;
         }
@@ -78,6 +80,7 @@ public:
             }
             else
             {
+                ESP_LOGI("SensorProcessor", "Footer Not Matched: %d", currentType_);
                 state_ = ProcessorState::ReadingData;
             }
             break;
