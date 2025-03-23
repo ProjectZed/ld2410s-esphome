@@ -53,7 +53,10 @@ public:
                     currentType_ = type;
                     state_ = ProcessorState::ReadingData;
                     ESP_LOGI("SensorProcessor", "Header Matched: %d", currentType_);
-                    break;
+                }
+                else
+                {
+                    reset();
                 }
             }
             break;
