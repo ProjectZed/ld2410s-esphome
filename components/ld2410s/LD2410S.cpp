@@ -118,14 +118,9 @@ namespace esphome
             {
                 uint8_t byte = this->read();
                 auto frame = sensor_processor.processByte(byte);
-                if (frame)
+                if (frame && areVectorsDifferent(lastFrame.data, frame->data))
                 {
-                    if (lastFrame)
-                    {
-                        if (areVectorsDifferent(lastFrame.data, frame->data)) {
-                            log_frame(*frame);
-                        }
-                    }
+                    log_frame(*frame);
                 }
             }
         }
