@@ -1,6 +1,9 @@
 #include "esphome/core/log.h"
 #include "LD2410S.h"
 #include "SensorProcessor.cpp"
+#include <cstdint>  // for uint8_t
+#include <iomanip>  // for std::setw, std::setfill, std::hex
+#include <sstream>  // for std::stringstream
 
 namespace esphome
 {
