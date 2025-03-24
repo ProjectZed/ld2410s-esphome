@@ -55,13 +55,8 @@ public:
                     currentType_ = type;
                     if (header.size() == 1)
                     {
-                        if (minDataSize == 0)
-                        {
-                            state_ = ProcessorState::WaitingForFooterStart;
-                        } else {
-                            dataStartpos_ = buffer_.size();
-                            state_ = ProcessorState::WaitingForData;
-                        }
+                        dataStartpos_ = buffer_.size();
+                        state_ = ProcessorState::WaitingForData;
                     }
                     else
                     {
@@ -82,15 +77,8 @@ public:
                 buffer_.push_back(byte);
                 if (buffer_.size() == header.size())
                 {
-                    if (minDataSize == 0)
-                    {
-                        state_ = ProcessorState::WaitingForFooterStart;
-                    }
-                    else
-                    {
-                        state_ = ProcessorState::WaitingForData;
-                        dataStartpos_ = buffer_.size();
-                    }
+                    dataStartpos_ = buffer_.size();
+                    state_ = ProcessorState::WaitingForData;
                 }
                 return nullptr;
             }
@@ -104,15 +92,20 @@ public:
             if (buffer_.size() - dataStartpos_ == maxDataSize)
             {
                 state_ = ProcessorState::WaitingForFooterStart;
+                footerStartPos_ = buffer_.size();
+            }
+            else if (buffer_.size() - dataStartpos_ > maxDataSize)
+            {
+                reset();
             }
             return nullptr;
         }
         else if (state_ == ProcessorState::WaitingForFooterStart)
         {
             const auto &footer = headerDataFooterMap_.at(currentType_).footer;
+            const auto &maxDataSize = headerDataFooterMap_.at(currentType_).maxDataSize;
             if (byte == footer[0])
             {
-                footerStartPos_ = buffer_.size();
                 buffer_.push_back(byte);
                 if (footer.size() == 1)
                 {
@@ -125,9 +118,14 @@ public:
                     state_ = ProcessorState::WaitingForFooterEnd;
                 }
             }
+            else if (buffer_.size() - dataStartpos_ > maxDataSize)
+            {
+                reset();
+            }
             else
             {
                 buffer_.push_back(byte);
+                footerStartPos_ = buffer_.size();
             }
             return nullptr;
         }
@@ -147,7 +145,7 @@ public:
             else
             {
                 buffer_.push_back(byte);
-                state_ = ProcessorState::WaitingForFooterStart;
+                state_ = ProcessorState::WaitingForData;
             }
             return nullptr;
         }
