@@ -70,7 +70,6 @@ public:
         else if (state_ == ProcessorState::WaitingForHeaderEnd)
         {
             const auto &header = headerDataFooterMap_.at(currentType_).header;
-            const auto &minDataSize = headerDataFooterMap_.at(currentType_).minDataSize;
             if (byte == header[buffer_.size()])
             {
                 buffer_.push_back(byte);
@@ -87,6 +86,7 @@ public:
         else if (state_ == ProcessorState::WaitingForData)
         {
             buffer_.push_back(byte);
+            const auto &minDataSize = headerDataFooterMap_.at(currentType_).minDataSize;
             const auto &maxDataSize = headerDataFooterMap_.at(currentType_).maxDataSize;
             if (buffer_.size() - dataStartpos_ == maxDataSize)
             {
@@ -96,6 +96,15 @@ public:
             else if (buffer_.size() - dataStartpos_ > maxDataSize)
             {
                 reset();
+            }
+            else if (buffer_.size() - dataStartpos_ < minDataSize)
+            {
+                // Do nothing, waiting for more data
+            }
+            else
+            {
+                state_ = ProcessorState::WaitingForFooterStart;
+                footerStartPos_ = buffer_.size();
             }
             return nullptr;
         }
