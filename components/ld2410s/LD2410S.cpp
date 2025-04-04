@@ -301,7 +301,7 @@ namespace esphome
             this->status_set_warning("Sending command to sensor");
             this->enable_configuration_command();
             CmdFrameT apply_config_cmd = this->prepare_apply_config_cmd();
-            this->send_command(apply_config_cmd);
+            this->send_command(apply_config_cmd, true);
             this->disable_configuration_command();
             this->status_clear_warning();
         }
@@ -311,7 +311,7 @@ namespace esphome
             this->status_set_warning("Sending command to sensor");
             this->enable_configuration_command();
             CmdFrameT threshold_update_cmd = this->prepare_threshold_cmd();
-            this->send_command(threshold_update_cmd);
+            this->send_command(threshold_update_cmd, true);
             this->disable_configuration_command();
             this->status_clear_warning();
         }
@@ -469,7 +469,7 @@ namespace esphome
                 sensor_processor.reset();
                 commandSentTime = millis();
                 auto frame = nullptr;
-                while (!frame)
+                while (frame == nullptr)
                 {
                     if (available())
                     {
