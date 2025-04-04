@@ -450,7 +450,7 @@ namespace esphome
             return true;
         }
 
-        void LD2410S::send_command(CmdFrameT frame)
+        void LD2410S::send_command(CmdFrameT frame, bool wait_for_response = true)
         {
             uint32_t start_millis = millis();
             uint8_t cmd_buffer[128];
@@ -464,6 +464,32 @@ namespace esphome
             log_command_frame(frame);
             this->write_array(cmd_buffer, frame.length);
             this->flush();
+            if (wait_for_response)
+            {
+                sensor_processor.reset();
+                commandSentTime = millis();
+                auto frame;
+                while (!frame)
+                {
+                    if (available())
+                    {
+                        uint8_t byte = this->read();
+                        frame = sensor_processor.processByte(byte);
+                        if (frame)
+                        {
+                            log_frame(*frame);
+                            break;
+                        }
+                    } else {
+                        delay(10);
+                    }
+                    if (millis() - commandSentTime > COMMAND_TIMEOUT)
+                    {
+                        ESP_LOGE(TAG, "Command timeout");
+                        break;
+                    }
+                }
+            }
         }
 
         PackageType LD2410S::read_line(uint8_t data, uint8_t *buffer, size_t pos)
