@@ -473,9 +473,8 @@ namespace esphome
                     if (available())
                     {
                         uint8_t byte = this->read();
-                        ESP_LOGI(TAG, "Byte: %02X", byte);
                         auto frame = sensor_processor.processByte(byte);
-                        if (frame != nullptr)
+                        if (frame)
                         {
                             ESP_LOGE(TAG, "Command reply received");
                             log_frame(*frame);
@@ -485,6 +484,9 @@ namespace esphome
                         delay(10);
                     }
                 }
+                ESP_LOGE(TAG, "Processor State: %d", sensor_processor.getState());
+                ESP_LOGE(TAG, "Buffer Size: %d", sensor_processor.getBufferSize());
+                log_buffer("Buffer:", sensor_processor.getBuffer(), sensor_processor.getBufferSize());
                 ESP_LOGE(TAG, "Command timeout");
             }
         }

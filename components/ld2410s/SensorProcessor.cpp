@@ -152,6 +152,7 @@ public:
     }
     
     ProcessorState getState() const { return state_; }
+    const std::vector<uint8_t> &getBuffer() const { return buffer_; }
     size_t getBufferSize() const { return buffer_.size(); }
     void reset()
     {
