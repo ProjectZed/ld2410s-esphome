@@ -30,7 +30,7 @@ namespace esphome
         static const char *TAG = "ld2410s";
         ReadState currentState = IDLE;
         unsigned long commandSentTime = 0;
-        const unsigned long COMMAND_TIMEOUT = 1000; // 1 second timeout
+        const unsigned long COMMAND_TIMEOUT = 200; // .2 second timeout
         const std::unordered_map<uint8_t, HeaderDataFooter> headerDataFooterMap = {
             {0x00, {{0xFD, 0xFC, 0xFB, 0xFA}, 6, 72, {0x04, 0x03, 0x02, 0x01}}},  // Command Frames
             {0x01, {{0x6E}, 3, 3, {0x62}}},  // Short Data Frames
