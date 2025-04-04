@@ -474,15 +474,17 @@ namespace esphome
                     {
                         uint8_t byte = this->read();
                         auto frame = sensor_processor.processByte(byte);
-                        if (frame)
+                        if (frame != nullptr)
                         {
+                            ESP_LOGE(TAG, "Command reply received");
                             log_frame(*frame);
-                            break;
+                            return;
                         }
                     } else {
                         delay(10);
                     }
                 }
+                ESP_LOGE(TAG, "Command timeout");
             }
         }
 
