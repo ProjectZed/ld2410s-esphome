@@ -468,7 +468,7 @@ namespace esphome
             {
                 sensor_processor.reset();
                 commandSentTime = millis();
-                while (millis() - commandSentTime > COMMAND_TIMEOUT)
+                while (millis() - commandSentTime < COMMAND_TIMEOUT)
                 {
                     if (available())
                     {
