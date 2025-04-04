@@ -129,37 +129,37 @@ namespace esphome
         void LD2410S::enable_configuration_command()
         {
             CmdFrameT en_conf_cmd = this->build_cmd_frame(START_CONFIG_MODE_CMD, START_CONFIG_MODE_VALUE, sizeof(START_CONFIG_MODE_VALUE) / sizeof(START_CONFIG_MODE_VALUE[0]));
-            this->send_command(en_conf_cmd);
+            this->send_command(en_conf_cmd, true);
         }
 
         void LD2410S::disable_configuration_command()
         {
             CmdFrameT dis_conf_cmd = this->build_cmd_frame(END_CONFIG_MODE_CMD, nullptr, 0);
-            this->send_command(dis_conf_cmd);
+            this->send_command(dis_conf_cmd, true);
         }
 
         void LD2410S::read_fw_version()
         {
             CmdFrameT read_fw_cmd = this->build_cmd_frame(READ_FW_CMD, nullptr, 0);
-            this->send_command(read_fw_cmd);
+            this->send_command(read_fw_cmd, true);
         }
 
         void LD2410S::read_serial_number()
         {
             CmdFrameT read_sn_cmd = this->build_cmd_frame(READ_SN_CMD, nullptr, 0);
-            this->send_command(read_sn_cmd);
+            this->send_command(read_sn_cmd, true);
         }
 
         void LD2410S::read_common_parameters()
         {
             CmdFrameT read_config_cmd = this->build_cmd_frame(READ_PARAMS_CMD, READ_PARAMS_VALUE, sizeof(READ_PARAMS_VALUE) / sizeof(READ_PARAMS_VALUE[0]));
-            this->send_command(read_config_cmd);
+            this->send_command(read_config_cmd, true);
         }
 
         void LD2410S::read_threshold_parameters()
         {
             CmdFrameT read_threshold_cmd = this->build_cmd_frame(READ_THRESHOLD_CMD, READ_THRESHOLD_VALUE, sizeof(READ_THRESHOLD_VALUE) / sizeof(READ_THRESHOLD_VALUE[0]));
-            this->send_command(read_threshold_cmd);
+            this->send_command(read_threshold_cmd, true);
         }
 
         CmdFrameT LD2410S::build_cmd_frame(uint16_t command, const uint8_t *data, size_t data_length)
@@ -450,7 +450,7 @@ namespace esphome
             return true;
         }
 
-        void LD2410S::send_command(CmdFrameT frame, bool wait_for_response = true)
+        void LD2410S::send_command(CmdFrameT frame, bool wait_for_response)
         {
             uint32_t start_millis = millis();
             uint8_t cmd_buffer[128];
@@ -468,7 +468,7 @@ namespace esphome
             {
                 sensor_processor.reset();
                 commandSentTime = millis();
-                auto frame;
+                auto frame = nullptr;
                 while (!frame)
                 {
                     if (available())
