@@ -468,13 +468,12 @@ namespace esphome
             {
                 sensor_processor.reset();
                 commandSentTime = millis();
-                auto frame = nullptr;
-                while (frame == nullptr)
+                while (millis() - commandSentTime > COMMAND_TIMEOUT)
                 {
                     if (available())
                     {
                         uint8_t byte = this->read();
-                        frame = sensor_processor.processByte(byte);
+                        auto frame = sensor_processor.processByte(byte);
                         if (frame)
                         {
                             log_frame(*frame);
@@ -482,11 +481,6 @@ namespace esphome
                         }
                     } else {
                         delay(10);
-                    }
-                    if (millis() - commandSentTime > COMMAND_TIMEOUT)
-                    {
-                        ESP_LOGE(TAG, "Command timeout");
-                        break;
                     }
                 }
             }
