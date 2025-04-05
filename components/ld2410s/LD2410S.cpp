@@ -1,6 +1,5 @@
 #include "esphome/core/log.h"
 #include "LD2410S.h"
-#include "SensorProcessor.cpp"
 #include <cstdint> // for uint8_t
 #include <iomanip> // for std::setw, std::setfill, std::hex
 #include <sstream> // for std::stringstream
@@ -64,7 +63,6 @@ namespace esphome
         {
             this->enable_configuration_command();
             this->read_fw_version();
-            this->read_serial_number();
             this->read_common_parameters();
             this->read_threshold_parameters();
             this->disable_configuration_command();
@@ -151,8 +149,8 @@ namespace esphome
         void LD2410S::enable_configuration_command()
         {
             CmdFrameT en_conf_cmd = this->build_cmd_frame(START_CONFIG_MODE_CMD, START_CONFIG_MODE_VALUE, sizeof(START_CONFIG_MODE_VALUE) / sizeof(START_CONFIG_MODE_VALUE[0]));
-            auto frame = this->send_command(en_conf_cmd, true);
-            if (frame && frame->type == 0x00)
+            Frame frame = this->send_command(en_conf_cmd, true);
+            if (frame && frame.type == 0x00)
             {
                 
             }
@@ -165,8 +163,8 @@ namespace esphome
         void LD2410S::disable_configuration_command()
         {
             CmdFrameT dis_conf_cmd = this->build_cmd_frame(END_CONFIG_MODE_CMD, nullptr, 0);
-            auto frame = this->send_command(dis_conf_cmd, true);
-            if (frame && frame->type == 0x00)
+            Frame frame = this->send_command(dis_conf_cmd, true);
+            if (frame && frame.type == 0x00)
             {
                 
             }
@@ -179,7 +177,7 @@ namespace esphome
         void LD2410S::read_fw_version()
         {
             CmdFrameT read_fw_cmd = this->build_cmd_frame(READ_FW_CMD, nullptr, 0);
-            auto frame = this->send_command(read_fw_cmd, true);
+            Frame frame = this->send_command(read_fw_cmd, true);
             if (frame && frame.type == 0x00)
             {
                 ESP_LOGD(TAG, "Fireware Version Major: %d", littleEndianToDecimal(std::vector<uint8_t>(frame.data.begin() + 8, frame.data.begin() + 9)));
@@ -372,7 +370,7 @@ namespace esphome
             // this->status_clear_warning();
         }
 
-        std::unique_ptr<Frame> LD2410S::send_command(CmdFrameT frame, bool wait_for_response)
+        Frame LD2410S::send_command(CmdFrameT frame, bool wait_for_response)
         {
             uint32_t start_millis = millis();
             uint8_t cmd_buffer[128];
@@ -380,7 +378,7 @@ namespace esphome
             if (frame.length == 0)
             {
                 ESP_LOGE(TAG, "Command buffer too small");
-                return;
+                return nullptr;
             }
 
             log_command_frame(frame);
@@ -395,8 +393,8 @@ namespace esphome
                     if (available())
                     {
                         uint8_t byte = this->read();
-                        auto frame = sensor_processor.processByte(byte);
-                        if (frame)
+                        Frame* frame = sensor_processor.processByte(byte);
+                        if (frame && frame.type == 0x00)
                         {
                             ESP_LOGD(TAG, "Command reply received");
                             log_frame(*frame);

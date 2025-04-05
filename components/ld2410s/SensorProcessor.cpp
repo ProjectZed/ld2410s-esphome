@@ -41,7 +41,7 @@ public:
     SensorProcessor(const std::unordered_map<uint8_t, HeaderDataFooter> &headerDataFooterMap)
         : headerDataFooterMap_(headerDataFooterMap) {}
 
-    std::unique_ptr<Frame> processByte(uint8_t byte)
+    Frame* processByte(uint8_t byte)
     {
         if (state_ == ProcessorState::WaitingForHeaderStart)
         {
@@ -119,9 +119,9 @@ public:
                 buffer_.push_back(byte);
                 if (footer.size() == 1)
                 {
-                    Frame frame{buffer_, currentType_};
+                    Frame* frame = new Frame{buffer_, currentType_};
                     reset();
-                    return std::make_unique<Frame>(frame);
+                    return frame;
                 }
                 else
                 {
