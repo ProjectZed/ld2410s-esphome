@@ -145,6 +145,10 @@ namespace esphome
                 {
                     log_frame(*frame);
                     lastFrame = frame;
+                    if (frame->type == 0x01)
+                    {
+                        ESP_LOGI(TAG, "Presense: %d\tDistance: %d", littleEndianToDecimal(frame->data[1]), littleEndianToDecimal(frame->data[2], frame->data[3]));
+                    }
                 }
             }
         }
