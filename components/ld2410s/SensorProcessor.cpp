@@ -147,9 +147,9 @@ public:
                 buffer_.push_back(byte);
                 if (buffer_.size() - footerStartPos_ == footer.size())
                 {
-                    Frame frame{buffer_, currentType_};
+                    Frame* frame = new Frame{buffer_, currentType_};
                     reset();
-                    return std::make_unique<Frame>(frame);
+                    return frame;
                 }
             }
             else

@@ -130,7 +130,7 @@ namespace esphome
             delay(10);
         }
 
-        Frame* lastFrame = {std::vector<uint8_t>(), 0};
+        Frame* lastFrame = new Frame{std::vector<uint8_t>(), 0};
 
         void LD2410S::loop()
         {
@@ -150,7 +150,7 @@ namespace esphome
         {
             CmdFrameT en_conf_cmd = this->build_cmd_frame(START_CONFIG_MODE_CMD, START_CONFIG_MODE_VALUE, sizeof(START_CONFIG_MODE_VALUE) / sizeof(START_CONFIG_MODE_VALUE[0]));
             Frame* frame = this->send_command(en_conf_cmd, true);
-            if (frame && frame.type == 0x00)
+            if (frame && frame->type == 0x00)
             {
                 
             }
