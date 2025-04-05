@@ -84,6 +84,8 @@
         "stack": "cpp",
         "string_view": "cpp",
         "variant": "cpp",
-        "__locale": "cpp"
+        "__locale": "cpp",
+        "__hash_table": "cpp",
+        "__tree": "cpp"
     }
 }
