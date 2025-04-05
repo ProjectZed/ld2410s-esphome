@@ -182,7 +182,7 @@ namespace esphome
             auto frame = this->send_command(read_fw_cmd, true);
             if (frame && frame->type == 0x00)
             {
-                ESP_LOGD(TAG, "Fireware Version Major: %d", littleEndianToDecimal(std::vector<uint8_t>(frame->data.begin() + 8, frame->data.begin() + 9));
+                ESP_LOGD(TAG, "Fireware Version Major: %d", littleEndianToDecimal(std::vector<uint8_t>(frame->data.begin() + 8, frame->data.begin() + 9)));
             }
             else
             {
