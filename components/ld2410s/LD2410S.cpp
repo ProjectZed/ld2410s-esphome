@@ -1,12 +1,13 @@
 #include "esphome/core/log.h"
 #include "LD2410S.h"
+#include <initializer_list>
 #include <cstdint> // for uint8_t
 #include <iomanip> // for std::setw, std::setfill, std::hex
 #include <sstream> // for std::stringstream
 
 namespace
 {
-    uint64_t littleEndianToDecimal(const std::vector<uint8_t> &bytes)
+    uint64_t littleEndianToDecimal(std::initializer_list<uint8_t> bytes)
     {
         uint64_t result = 0;
 
