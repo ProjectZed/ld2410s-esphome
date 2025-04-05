@@ -88,7 +88,7 @@ namespace esphome
                     ss << " ";
                 }
             }
-            ESP_LOGI(TAG, "%s", ss.str().c_str());
+            ESP_LOGD(TAG, "%s", ss.str().c_str());
         }
 
         void log_buffer(const char *prefix, const std::vector<uint8_t> buffer, uint16_t length)
@@ -126,7 +126,7 @@ namespace esphome
             }
 
             // Output the log
-            ESP_LOGI(TAG, "%s", log_buffer);
+            ESP_LOGD(TAG, "%s", log_buffer);
             delay(10);
         }
 
@@ -180,7 +180,7 @@ namespace esphome
             Frame* frame = this->send_command(read_fw_cmd, true);
             if (frame && frame->type == 0x00)
             {
-                ESP_LOGD(TAG, "Fireware Version Major: %d", littleEndianToDecimal(std::vector<uint8_t>(frame.data.begin() + 8, frame.data.begin() + 9)));
+                ESP_LOGI(TAG, "Fireware Version Major: %d", littleEndianToDecimal(std::vector<uint8_t>(frame.data.begin() + 8, frame.data.begin() + 9)));
             }
             else
             {
