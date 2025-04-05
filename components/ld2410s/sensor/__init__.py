@@ -8,7 +8,8 @@ from esphome.const import (
     UNIT_CENTIMETER,
     UNIT_PERCENT,
 )
-from .. import ld2410s_ns, LD2410S, CONF_LD2410S_ID
+
+from .. import CONF_LD2410S_ID, LD2410S, ld2410s_ns
 
 LD2410SSensor = ld2410s_ns.class_("LD2410SSensor", sensor.Sensor, cg.Component)
 

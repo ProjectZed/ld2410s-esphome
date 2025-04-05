@@ -1,17 +1,18 @@
 import esphome.codegen as cg
-from esphome.components import number
 import esphome.config_validation as cv
+from esphome.components import number
 from esphome.const import (
     DEVICE_CLASS_DISTANCE,
     DEVICE_CLASS_DURATION,
     DEVICE_CLASS_FREQUENCY,
-    UNIT_SECOND,
-    UNIT_HERTZ,
     ENTITY_CATEGORY_CONFIG,
     ICON_MOTION_SENSOR,
-    ICON_TIMELAPSE,
     ICON_PULSE,
+    ICON_TIMELAPSE,
+    UNIT_HERTZ,
+    UNIT_SECOND,
 )
+
 from .. import CONF_LD2410S_ID, LD2410S, ld2410s_ns
 
 LD2410SMaxDistanceNumber = ld2410s_ns.class_("LD2410SMaxDistanceNumber", number.Number)

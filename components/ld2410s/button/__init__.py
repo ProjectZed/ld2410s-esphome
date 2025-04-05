@@ -1,16 +1,17 @@
 import esphome.codegen as cg
-from esphome.components import button
 import esphome.config_validation as cv
+from esphome.components import button
 from esphome.const import (
-    ENTITY_CATEGORY_DIAGNOSTIC,
-    ENTITY_CATEGORY_CONFIG,
-    ICON_BUG,
     DEVICE_CLASS_IDENTIFY,
     DEVICE_CLASS_RESTART,
     DEVICE_CLASS_UPDATE,
-    ICON_RESTART_ALERT,
+    ENTITY_CATEGORY_CONFIG,
+    ENTITY_CATEGORY_DIAGNOSTIC,
+    ICON_BUG,
     ICON_MEMORY,
+    ICON_RESTART_ALERT,
 )
+
 from .. import CONF_LD2410S_ID, LD2410S, ld2410s_ns
 
 LD2410SEnableConfigButton = ld2410s_ns.class_(

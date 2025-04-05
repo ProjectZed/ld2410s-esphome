@@ -1,7 +1,8 @@
 import esphome.codegen as cg
-from esphome.components import select
 import esphome.config_validation as cv
+from esphome.components import select
 from esphome.const import ENTITY_CATEGORY_CONFIG
+
 from .. import CONF_LD2410S_ID, LD2410S, ld2410s_ns
 
 CONF_RESPONSE_SPEED = "response_speed"
