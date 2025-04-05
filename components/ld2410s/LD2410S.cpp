@@ -10,15 +10,17 @@ namespace
     uint64_t littleEndianToDecimal(std::initializer_list<uint8_t> bytes)
     {
         uint64_t result = 0;
-
+        size_t index = 0;
         // Process each byte, starting with least significant (first in little-endian)
-        for (size_t i = 0; i < bytes.size(); ++i)
+        for (uint8_t byte : bytes)
         {
             // Shift each byte to its proper position and OR it into the result
             // First byte (i=0) doesn't need shifting, second byte (i=1) shifts 8 bits, etc.
-            result |= static_cast<uint64_t>(bytes[i]) << (i * 8);
-        }
+            result |= static_cast<uint64_t>(byte) << (index * 8);
 
+            // Don't forget to increment the index
+            index++;
+        }
         return result;
     }
 }
@@ -131,14 +133,14 @@ namespace esphome
             delay(10);
         }
 
-        Frame* lastFrame = new Frame{std::vector<uint8_t>(), 0};
+        Frame *lastFrame = new Frame{std::vector<uint8_t>(), 0};
 
         void LD2410S::loop()
         {
             while (available())
             {
                 uint8_t byte = this->read();
-                Frame* frame = sensor_processor.processByte(byte);
+                Frame *frame = sensor_processor.processByte(byte);
                 if (frame && areVectorsDifferent(lastFrame->data, frame->data))
                 {
                     log_frame(*frame);
@@ -150,10 +152,9 @@ namespace esphome
         void LD2410S::enable_configuration_command()
         {
             CmdFrameT en_conf_cmd = this->build_cmd_frame(START_CONFIG_MODE_CMD, START_CONFIG_MODE_VALUE, sizeof(START_CONFIG_MODE_VALUE) / sizeof(START_CONFIG_MODE_VALUE[0]));
-            Frame* frame = this->send_command(en_conf_cmd, true);
+            Frame *frame = this->send_command(en_conf_cmd, true);
             if (frame && frame->type == 0x00)
             {
-                
             }
             else
             {
@@ -164,10 +165,9 @@ namespace esphome
         void LD2410S::disable_configuration_command()
         {
             CmdFrameT dis_conf_cmd = this->build_cmd_frame(END_CONFIG_MODE_CMD, nullptr, 0);
-            Frame* frame = this->send_command(dis_conf_cmd, true);
+            Frame *frame = this->send_command(dis_conf_cmd, true);
             if (frame && frame->type == 0x00)
             {
-                
             }
             else
             {
@@ -178,7 +178,7 @@ namespace esphome
         void LD2410S::read_fw_version()
         {
             CmdFrameT read_fw_cmd = this->build_cmd_frame(READ_FW_CMD, nullptr, 0);
-            Frame* frame = this->send_command(read_fw_cmd, true);
+            Frame *frame = this->send_command(read_fw_cmd, true);
             if (frame && frame->type == 0x00)
             {
                 ESP_LOGI(TAG, "Fireware Version Major: %d", littleEndianToDecimal({frame->data[14], frame->data[15]}));
@@ -194,10 +194,9 @@ namespace esphome
         void LD2410S::read_common_parameters()
         {
             CmdFrameT read_config_cmd = this->build_cmd_frame(READ_PARAMS_CMD, READ_PARAMS_VALUE, sizeof(READ_PARAMS_VALUE) / sizeof(READ_PARAMS_VALUE[0]));
-            Frame* frame = this->send_command(read_config_cmd, true);
+            Frame *frame = this->send_command(read_config_cmd, true);
             if (frame && frame->type == 0x00)
             {
-                
             }
             else
             {
@@ -208,10 +207,9 @@ namespace esphome
         void LD2410S::read_threshold_parameters()
         {
             CmdFrameT read_threshold_cmd = this->build_cmd_frame(READ_THRESHOLD_CMD, READ_THRESHOLD_VALUE, sizeof(READ_THRESHOLD_VALUE) / sizeof(READ_THRESHOLD_VALUE[0]));
-            Frame* frame = this->send_command(read_threshold_cmd, true);
+            Frame *frame = this->send_command(read_threshold_cmd, true);
             if (frame && frame->type == 0x00)
             {
-                
             }
             else
             {
@@ -373,7 +371,7 @@ namespace esphome
             // this->status_clear_warning();
         }
 
-        Frame* LD2410S::send_command(CmdFrameT frame, bool wait_for_response)
+        Frame *LD2410S::send_command(CmdFrameT frame, bool wait_for_response)
         {
             uint32_t start_millis = millis();
             uint8_t cmd_buffer[128];
@@ -396,7 +394,7 @@ namespace esphome
                     if (available())
                     {
                         uint8_t byte = this->read();
-                        Frame* frame = sensor_processor.processByte(byte);
+                        Frame *frame = sensor_processor.processByte(byte);
                         if (frame && frame->type == 0x00)
                         {
                             ESP_LOGD(TAG, "Command reply received");
