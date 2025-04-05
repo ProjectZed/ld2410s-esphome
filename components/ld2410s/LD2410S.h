@@ -3,6 +3,7 @@
 #include "esphome/core/component.h"
 #include "esphome/core/helpers.h"
 #include "esphome/components/uart/uart.h"
+#include "SensorProcessor.cpp"
 #ifdef USE_NUMBER
 #include "esphome/components/number/number.h"
 #endif
