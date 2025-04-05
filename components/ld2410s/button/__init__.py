@@ -9,14 +9,20 @@ from esphome.const import (
     DEVICE_CLASS_RESTART,
     DEVICE_CLASS_UPDATE,
     ICON_RESTART_ALERT,
-    ICON_MEMORY
+    ICON_MEMORY,
 )
 from .. import CONF_LD2410S_ID, LD2410S, ld2410s_ns
 
-LD2410SEnableConfigButton = ld2410s_ns.class_("LD2410SEnableConfigButton", button.Button)
-LD2410SDisableConfigButton = ld2410s_ns.class_("LD2410SDisableConfigButton", button.Button)
+LD2410SEnableConfigButton = ld2410s_ns.class_(
+    "LD2410SEnableConfigButton", button.Button
+)
+LD2410SDisableConfigButton = ld2410s_ns.class_(
+    "LD2410SDisableConfigButton", button.Button
+)
 LD2410SApplyConfigButton = ld2410s_ns.class_("LD2410SApplyConfigButton", button.Button)
-LD2410SAutoConfigThreshold = ld2410s_ns.class_("LD2410SAutoConfigThreshold", button.Button)
+LD2410SAutoConfigThreshold = ld2410s_ns.class_(
+    "LD2410SAutoConfigThreshold", button.Button
+)
 
 CONF_ENABLE_CONFIG = "enable_config"
 CONF_DISABLE_CONFIG = "disable_config"
@@ -29,13 +35,13 @@ CONFIG_SCHEMA = {
         LD2410SEnableConfigButton,
         device_class=DEVICE_CLASS_IDENTIFY,
         entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
-        icon=ICON_BUG
+        icon=ICON_BUG,
     ),
     cv.Optional(CONF_DISABLE_CONFIG): button.button_schema(
         LD2410SDisableConfigButton,
         device_class=DEVICE_CLASS_IDENTIFY,
         entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
-        icon=ICON_BUG
+        icon=ICON_BUG,
     ),
     cv.Required(CONF_APPLY_CONFIG): button.button_schema(
         LD2410SApplyConfigButton,
@@ -48,8 +54,9 @@ CONFIG_SCHEMA = {
         device_class=DEVICE_CLASS_UPDATE,
         entity_category=ENTITY_CATEGORY_CONFIG,
         icon="mdi:icon-refresh",
-    )
+    ),
 }
+
 
 async def to_code(config):
     ld2410s_component = await cg.get_variable(config[CONF_LD2410S_ID])
@@ -69,4 +76,3 @@ async def to_code(config):
         b = await button.new_button(auto_threshold)
         await cg.register_parented(b, config[CONF_LD2410S_ID])
         cg.add(ld2410s_component.set_auto_threshold_button(b))
-    

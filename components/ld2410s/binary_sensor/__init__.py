@@ -1,7 +1,12 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import binary_sensor
-from esphome.const import CONF_ID, DEVICE_CLASS_OCCUPANCY, DEVICE_CLASS_EMPTY, CONF_HAS_TARGET
+from esphome.const import (
+    CONF_ID,
+    DEVICE_CLASS_OCCUPANCY,
+    DEVICE_CLASS_EMPTY,
+    CONF_HAS_TARGET,
+)
 from .. import ld2410s_ns, LD2410S, CONF_LD2410S_ID
 
 LD2410SBinarySensor = ld2410s_ns.class_(
