@@ -1,28 +1,32 @@
 #include "esphome/core/log.h"
 #include "LD2410S.h"
 #include "SensorProcessor.cpp"
-#include <cstdint>  // for uint8_t
-#include <iomanip>  // for std::setw, std::setfill, std::hex
-#include <sstream>  // for std::stringstream
+#include <cstdint> // for uint8_t
+#include <iomanip> // for std::setw, std::setfill, std::hex
+#include <sstream> // for std::stringstream
 
 namespace esphome
 {
     namespace ld2410s
     {
         template <typename T>
-        bool areVectorsDifferent(const std::vector<T>& vec1, const std::vector<T>& vec2) {
+        bool areVectorsDifferent(const std::vector<T> &vec1, const std::vector<T> &vec2)
+        {
             // Quick check: if sizes are different, vectors are different
-            if (vec1.size() != vec2.size()) {
+            if (vec1.size() != vec2.size())
+            {
                 return true;
             }
-            
+
             // Compare each element
-            for (size_t i = 0; i < vec1.size(); ++i) {
-                if (vec1[i] != vec2[i]) {
-                    return true;  // Found a difference
+            for (size_t i = 0; i < vec1.size(); ++i)
+            {
+                if (vec1[i] != vec2[i])
+                {
+                    return true; // Found a difference
                 }
             }
-            
+
             // No differences found
             return false;
         }
@@ -32,9 +36,9 @@ namespace esphome
         unsigned long commandSentTime = 0;
         const unsigned long COMMAND_TIMEOUT = 200; // .2 second timeout
         const std::unordered_map<uint8_t, HeaderDataFooter> headerDataFooterMap = {
-            {0x00, {{0xFD, 0xFC, 0xFB, 0xFA}, 6, 72, {0x04, 0x03, 0x02, 0x01}}},  // Command Frames
-            {0x01, {{0x6E}, 3, 3, {0x62}}},  // Short Data Frames
-            {0x02, {{0xF4, 0xF3, 0xF2, 0xF1}, 5, 72, {0xF8, 0xF7, 0xF6, 0xF5}}},  // Long Data Frames
+            {0x00, {{0xFD, 0xFC, 0xFB, 0xFA}, 6, 72, {0x04, 0x03, 0x02, 0x01}}}, // Command Frames
+            {0x01, {{0x6E}, 3, 3, {0x62}}},                                      // Short Data Frames
+            {0x02, {{0xF4, 0xF3, 0xF2, 0xF1}, 5, 72, {0xF8, 0xF7, 0xF6, 0xF5}}}, // Long Data Frames
         };
         SensorProcessor sensor_processor = SensorProcessor(headerDataFooterMap);
 
@@ -480,7 +484,9 @@ namespace esphome
                             log_frame(*frame);
                             return;
                         }
-                    } else {
+                    }
+                    else
+                    {
                         delay(10);
                     }
                 }

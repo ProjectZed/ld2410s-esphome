@@ -3,9 +3,11 @@
 #include <memory>
 #include <unordered_map>
 
-namespace std {
-    template<typename T, typename... Args>
-    std::unique_ptr<T> make_unique(Args&&... args) {
+namespace std
+{
+    template <typename T, typename... Args>
+    std::unique_ptr<T> make_unique(Args &&...args)
+    {
         return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
     }
 }
@@ -26,11 +28,11 @@ struct HeaderDataFooter
 
 enum class ProcessorState
 {
-    WaitingForHeaderStart,
-    WaitingForHeaderEnd,
-    WaitingForData,
-    WaitingForFooterStart,
-    WaitingForFooterEnd,
+    WaitingForHeaderStart, // 0
+    WaitingForHeaderEnd,   // 1
+    WaitingForData,        // 2
+    WaitingForFooterStart, // 3
+    WaitingForFooterEnd,   // 4
 };
 
 class SensorProcessor
@@ -159,7 +161,7 @@ public:
         }
         return nullptr;
     }
-    
+
     ProcessorState getState() const { return state_; }
     const std::vector<uint8_t> &getBuffer() const { return buffer_; }
     size_t getBufferSize() const { return buffer_.size(); }
