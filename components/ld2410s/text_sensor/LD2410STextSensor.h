@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../LD2410S.h"
 #include "esphome/components/text_sensor/text_sensor.h"
 
 namespace esphome
@@ -18,17 +17,9 @@ namespace esphome
                     this->fw_version_text_sensor->publish_state(fw);
                 }
             }
-            void on_sn(std::string &sn) override
-            {
-                if (this->sn_text_sensor != nullptr)
-                {
-                    this->sn_text_sensor->publish_state(sn);
-                }
-            }
 
         private:
             text_sensor::TextSensor *fw_version_text_sensor{nullptr};
-            text_sensor::TextSensor *sn_text_sensor{nullptr};
         };
     }
 }
