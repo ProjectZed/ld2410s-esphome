@@ -30,9 +30,6 @@ namespace esphome
         static const uint16_t READ_FW_CMD = 0x0000;
         static const uint16_t READ_FW_REPLY = 0x0100;
 
-        static const uint16_t READ_SN_CMD = 0x0011;
-        static const uint16_t READ_SN_REPLY = 0x0111;
-
         static const uint16_t READ_PARAMS_CMD = 0x0071;
         static const uint8_t READ_PARAMS_VALUE[] = {0x05, 0x00, 0x0A, 0x00, 0x06, 0x00, 0x02, 0x00, 0x0C, 0x00, 0x0B, 0x00};
         static const uint16_t READ_PARAMS_REPLY = 0x0171;
@@ -120,7 +117,6 @@ namespace esphome
             virtual void on_threshold_update(bool running) {};
             virtual void on_threshold_progress(int progress) {};
             virtual void on_fw_version(std::string &fw) {};
-            virtual void on_sn(std::string &sn) {};
         };
 
         class LD2410S : public uart::UARTDevice, public Component
@@ -135,13 +131,12 @@ namespace esphome
             void register_listener(LD2410SListener *listener) { this->listeners.push_back(listener); };
 
             CmdFrameT build_cmd_frame(uint16_t command, const uint8_t *data, size_t data_length);
+            void send_command(CmdFrameT cmd_frame, bool wait_for_response);
             void enable_configuration_command();
             void disable_configuration_command();
             void read_fw_version();
-            void read_serial_number();
             void read_common_parameters();
             void read_threshold_parameters();
-            void process_read_sn_ack(uint8_t *data);
 
             void apply_config();
             void start_auto_threshold_update();
@@ -180,12 +175,6 @@ namespace esphome
 #ifdef USE_SELECT
             select::Select *response_speed_select{nullptr};
 #endif
-            CmdFrameT prepare_read_config_cmd();
-            CmdFrameT prepare_apply_config_cmd();
-            CmdFrameT prepare_threshold_cmd();
-            void send_command(CmdFrameT cmd_frame, bool wait_for_response);
-            PackageType read_line(uint8_t data, uint8_t *buffer, size_t pos);
-            // bool process_cmd_ack_package(uint8_t* buffer, int len);
             void process_data_package(PackageType type, uint8_t *buffer, size_t pos);
             int read_int(uint8_t *buffer, size_t pos, size_t len)
             {
