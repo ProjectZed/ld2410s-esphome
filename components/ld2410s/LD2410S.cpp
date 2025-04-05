@@ -181,6 +181,8 @@ namespace esphome
             if (frame && frame->type == 0x00)
             {
                 ESP_LOGI(TAG, "Fireware Version Major: %d", littleEndianToDecimal(std::vector<uint8_t>(frame->data.begin() + 8, frame->data.begin() + 9)));
+                ESP_LOGI(TAG, "Fireware Version Minor: %d", littleEndianToDecimal(std::vector<uint8_t>(frame->data.begin() + 10, frame->data.begin() + 11)));
+                ESP_LOGI(TAG, "Fireware Version Patch: %d", littleEndianToDecimal(std::vector<uint8_t>(frame->data.begin() + 12, frame->data.begin() + 13)));
             }
             else
             {
