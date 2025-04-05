@@ -172,7 +172,7 @@ namespace esphome
             }
             else
             {
-                ESP_LOGE(TAG, "Failed to send command: 0x%04X", en_conf_cmd.command);
+                ESP_LOGE(TAG, "Failed to send command: 0x%04X", dis_conf_cmd.command);
             }
         }
 
@@ -180,13 +180,13 @@ namespace esphome
         {
             CmdFrameT read_fw_cmd = this->build_cmd_frame(READ_FW_CMD, nullptr, 0);
             auto frame = this->send_command(read_fw_cmd, true);
-            if (frame && frame->type == 0x00)
+            if (frame && frame.type == 0x00)
             {
-                ESP_LOGD(TAG, "Fireware Version Major: %d", littleEndianToDecimal(std::vector<uint8_t>(frame->data.begin() + 8, frame->data.begin() + 9)));
+                ESP_LOGD(TAG, "Fireware Version Major: %d", littleEndianToDecimal(std::vector<uint8_t>(frame.data.begin() + 8, frame.data.begin() + 9)));
             }
             else
             {
-                ESP_LOGE(TAG, "Failed to send command: 0x%04X", en_conf_cmd.command);
+                ESP_LOGE(TAG, "Failed to send command: 0x%04X", read_fw_cmd.command);
             }
         }
 
@@ -200,7 +200,7 @@ namespace esphome
             }
             else
             {
-                ESP_LOGE(TAG, "Failed to send command: 0x%04X", en_conf_cmd.command);
+                ESP_LOGE(TAG, "Failed to send command: 0x%04X", read_config_cmd.command);
             }
         }
 
@@ -214,7 +214,7 @@ namespace esphome
             }
             else
             {
-                ESP_LOGE(TAG, "Failed to send command: 0x%04X", en_conf_cmd.command);
+                ESP_LOGE(TAG, "Failed to send command: 0x%04X", read_threshold_cmd.command);
             }
         }
 
@@ -354,22 +354,22 @@ namespace esphome
 
         void LD2410S::apply_config()
         {
-            this->status_set_warning("Sending command to sensor");
-            this->enable_configuration_command();
-            CmdFrameT apply_config_cmd = this->prepare_apply_config_cmd();
-            this->send_command(apply_config_cmd, true);
-            this->disable_configuration_command();
-            this->status_clear_warning();
+            // this->status_set_warning("Sending command to sensor");
+            // this->enable_configuration_command();
+            // CmdFrameT apply_config_cmd = this->prepare_apply_config_cmd();
+            // this->send_command(apply_config_cmd, true);
+            // this->disable_configuration_command();
+            // this->status_clear_warning();
         }
 
         void LD2410S::start_auto_threshold_update()
         {
-            this->status_set_warning("Sending command to sensor");
-            this->enable_configuration_command();
-            CmdFrameT threshold_update_cmd = this->prepare_threshold_cmd();
-            this->send_command(threshold_update_cmd, true);
-            this->disable_configuration_command();
-            this->status_clear_warning();
+            // this->status_set_warning("Sending command to sensor");
+            // this->enable_configuration_command();
+            // CmdFrameT threshold_update_cmd = this->prepare_threshold_cmd();
+            // this->send_command(threshold_update_cmd, true);
+            // this->disable_configuration_command();
+            // this->status_clear_warning();
         }
 
         std::unique_ptr<Frame> LD2410S::send_command(CmdFrameT frame, bool wait_for_response)
