@@ -157,7 +157,7 @@ namespace esphome
         {
             CmdFrameT en_conf_cmd = this->build_cmd_frame(START_CONFIG_MODE_CMD, START_CONFIG_MODE_VALUE, sizeof(START_CONFIG_MODE_VALUE) / sizeof(START_CONFIG_MODE_VALUE[0]));
             Frame *frame = this->send_command(en_conf_cmd, true);
-            if (frame && frame->type == 0x00)
+            if (frame)
             {
             }
             else
@@ -170,7 +170,7 @@ namespace esphome
         {
             CmdFrameT dis_conf_cmd = this->build_cmd_frame(END_CONFIG_MODE_CMD, nullptr, 0);
             Frame *frame = this->send_command(dis_conf_cmd, true);
-            if (frame && frame->type == 0x00)
+            if (frame)
             {
             }
             else
@@ -183,7 +183,7 @@ namespace esphome
         {
             CmdFrameT read_fw_cmd = this->build_cmd_frame(READ_FW_CMD, nullptr, 0);
             Frame *frame = this->send_command(read_fw_cmd, true);
-            if (frame && frame->type == 0x00)
+            if (frame)
             {
                 ESP_LOGI(TAG, "Fireware Version Major: %d", littleEndianToDecimal({frame->data[14], frame->data[15]}));
                 ESP_LOGI(TAG, "Fireware Version Minor: %d", littleEndianToDecimal({frame->data[16], frame->data[17]}));
@@ -199,8 +199,15 @@ namespace esphome
         {
             CmdFrameT read_config_cmd = this->build_cmd_frame(READ_PARAMS_CMD, READ_PARAMS_VALUE, sizeof(READ_PARAMS_VALUE) / sizeof(READ_PARAMS_VALUE[0]));
             Frame *frame = this->send_command(read_config_cmd, true);
-            if (frame && frame->type == 0x00)
+            if (frame)
             {
+                ESP_LOGI(TAG, "Frame Length: %llu", littleEndianToDecimal({frame->data[4], frame->data[5]}));
+                ESP_LOGI(TAG, "Furthest Distance: %llu", littleEndianToDecimal({frame->data[9], frame->data[13]}));
+                ESP_LOGI(TAG, "Nearest Distance: %llu", littleEndianToDecimal({frame->data[14], frame->data[18]}));
+                ESP_LOGI(TAG, "Unattended Delay: %llu", littleEndianToDecimal({frame->data[19], frame->data[23]}));
+                ESP_LOGI(TAG, "Status Frequency: %llu", littleEndianToDecimal({frame->data[24], frame->data[28]}));
+                ESP_LOGI(TAG, "Distance Frequency: %llu", littleEndianToDecimal({frame->data[29], frame->data[33]}));
+                ESP_LOGI(TAG, "Response Speed: %llu", littleEndianToDecimal({frame->data[34], frame->data[38]}));
             }
             else
             {
@@ -212,7 +219,7 @@ namespace esphome
         {
             CmdFrameT read_threshold_cmd = this->build_cmd_frame(READ_THRESHOLD_CMD, READ_THRESHOLD_VALUE, sizeof(READ_THRESHOLD_VALUE) / sizeof(READ_THRESHOLD_VALUE[0]));
             Frame *frame = this->send_command(read_threshold_cmd, true);
-            if (frame && frame->type == 0x00)
+            if (frame)
             {
             }
             else
@@ -316,7 +323,7 @@ namespace esphome
             snprintf(buffer, sizeof(buffer), "Command Frame\n%s\n%s\n%s\n%s\n%s\n%s",
                      line_2, line_3, line_4, line_5, line_6, line_7);
 
-            ESP_LOGI(TAG, "%s", buffer);
+            ESP_LOGD(TAG, "%s", buffer);
             delay(10);
         }
 
@@ -351,7 +358,7 @@ namespace esphome
                      ack.data_length > 0 ? line_data : "", ack.data_length > 0 ? "\n" : "",
                      ack.footer, ack.length);
 
-            ESP_LOGI(TAG, "%s", buffer);
+            ESP_LOGD(TAG, "%s", buffer);
             delay(10);
         }
 
