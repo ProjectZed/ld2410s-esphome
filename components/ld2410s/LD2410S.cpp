@@ -202,12 +202,12 @@ namespace esphome
             if (frame)
             {
                 ESP_LOGI(TAG, "Frame Length: %llu", littleEndianToDecimal({frame->data[4], frame->data[5]}));
-                ESP_LOGI(TAG, "Furthest Distance: %llu", littleEndianToDecimal({frame->data[9], frame->data[13]}));
-                ESP_LOGI(TAG, "Nearest Distance: %llu", littleEndianToDecimal({frame->data[14], frame->data[18]}));
-                ESP_LOGI(TAG, "Unattended Delay: %llu", littleEndianToDecimal({frame->data[19], frame->data[23]}));
-                ESP_LOGI(TAG, "Status Frequency: %llu", littleEndianToDecimal({frame->data[24], frame->data[28]}));
-                ESP_LOGI(TAG, "Distance Frequency: %llu", littleEndianToDecimal({frame->data[29], frame->data[33]}));
-                ESP_LOGI(TAG, "Response Speed: %llu", littleEndianToDecimal({frame->data[34], frame->data[38]}));
+                ESP_LOGI(TAG, "Furthest Distance: %llu", littleEndianToDecimal({frame->data[10], frame->data[13]}));
+                ESP_LOGI(TAG, "Nearest Distance: %llu", littleEndianToDecimal({frame->data[14], frame->data[17]}));
+                ESP_LOGI(TAG, "Unattended Delay: %llu", littleEndianToDecimal({frame->data[18], frame->data[21]}));
+                ESP_LOGI(TAG, "Status Frequency: %llu", littleEndianToDecimal({frame->data[22], frame->data[25]}));
+                ESP_LOGI(TAG, "Distance Frequency: %llu", littleEndianToDecimal({frame->data[26], frame->data[29]}));
+                ESP_LOGI(TAG, "Response Speed: %llu", littleEndianToDecimal({frame->data[30], frame->data[33]}));
             }
             else
             {
