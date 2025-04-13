@@ -249,7 +249,7 @@ namespace esphome
             write_params_value.push_back(0x00);
             write_params_value.insert(write_params_value.end(), nearest_gate.begin(), nearest_gate.end());
 
-            auto delay_time = decimalToLittleEndian(10, 4);
+            auto delay_time = decimalToLittleEndian(20, 4);
             write_params_value.push_back(0x06);
             write_params_value.push_back(0x00);
             write_params_value.insert(write_params_value.end(), delay_time.begin(), delay_time.end());
