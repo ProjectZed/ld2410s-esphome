@@ -23,6 +23,30 @@ namespace
         }
         return result;
     }
+
+    std::vector<uint8_t> decimalToLittleEndian(uint64_t value, size_t numBytes)
+    {
+        if (numBytes == 0)
+        {
+            // Or return an empty vector depending on desired behavior
+            throw std::invalid_argument("Number of bytes cannot be zero.");
+        }
+
+        std::vector<uint8_t> result;
+        result.reserve(numBytes); // Pre-allocate memory for efficiency
+
+        // Little-endian: Least Significant Byte (LSB) first
+        for (size_t i = 0; i < numBytes; ++i)
+        {
+            // Extract the i-th byte (starting from LSB at i=0)
+            // (value >> (i * 8)) shifts the desired byte to the LSB position
+            // & 0xFF masks out all other bytes, keeping only the LSB
+            uint8_t byte = static_cast<uint8_t>((value >> (i * 8)) & 0xFF);
+            result.push_back(byte);
+        }
+
+        return result;
+    }
 }
 
 namespace esphome
@@ -66,6 +90,8 @@ namespace esphome
         {
             this->enable_configuration_command();
             this->read_fw_version();
+            this->read_common_parameters();
+            this->write_common_parameters();
             this->read_common_parameters();
             this->read_threshold_parameters();
             this->disable_configuration_command();
@@ -212,6 +238,51 @@ namespace esphome
             else
             {
                 ESP_LOGE(TAG, "Failed to send command: 0x%04X", read_config_cmd.command);
+            }
+        }
+
+        void LD2410S::write_common_parameters()
+        {
+            std::vector<u_int8_t> write_params_value = {}
+            
+            auto farthest_gate = decimalToLittleEndian(16, 4);
+            write_params_value.push_back(0x05);
+            write_params_value.push_back(0x00);
+            write_params_value.insert(write_params_value.end(), farthest_gate.begin(), farthest_gate.end());
+            
+            auto nearest_gate = decimalToLittleEndian(0, 4);
+            write_params_value.push_back(0x0A);
+            write_params_value.push_back(0x00);
+            write_params_value.insert(write_params_value.end(), nearest_gate.begin(), nearest_gate.end());
+
+            auto delay_time = decimalToLittleEndian(10, 4);
+            write_params_value.push_back(0x06);
+            write_params_value.push_back(0x00);
+            write_params_value.insert(write_params_value.end(), delay_time.begin(), delay_time.end());
+
+            auto status_frequency = decimalToLittleEndian(20, 4);
+            write_params_value.push_back(0x02);
+            write_params_value.push_back(0x00);
+            write_params_value.insert(write_params_value.end(), status_frequency.begin(), status_frequency.end());
+
+            auto distance_frequency = decimalToLittleEndian(20, 4);
+            write_params_value.push_back(0x0C);
+            write_params_value.push_back(0x00);
+            write_params_value.insert(write_params_value.end(), distance_frequency.begin(), distance_frequency.end());
+
+            auto response_speed = decimalToLittleEndian(10, 4);
+            write_params_value.push_back(0x0B);
+            write_params_value.push_back(0x00);
+            write_params_value.insert(write_params_value.end(), response_speed.begin(), response_speed.end());
+            CmdFrameT write_config_cmd = this->build_cmd_frame(WRITE_PARAMS_CMD, write_params_value, sizeof(write_params_value) / sizeof(write_params_value[0]));
+            Frame *frame = this->send_command(write_config_cmd, true);
+            if (frame)
+            {
+                log_frame(*frame);
+            }
+            else
+            {
+                ESP_LOGE(TAG, "Failed to send command: 0x%04X", write_config_cmd.command);
             }
         }
 

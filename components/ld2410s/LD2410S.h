@@ -137,6 +137,7 @@ namespace esphome
             void disable_configuration_command();
             void read_fw_version();
             void read_common_parameters();
+            void write_common_parameters();
             void read_threshold_parameters();
 
             void apply_config();
