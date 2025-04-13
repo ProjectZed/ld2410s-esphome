@@ -26,12 +26,6 @@ namespace
 
     std::vector<uint8_t> decimalToLittleEndian(uint64_t value, size_t numBytes)
     {
-        if (numBytes == 0)
-        {
-            // Or return an empty vector depending on desired behavior
-            throw std::invalid_argument("Number of bytes cannot be zero.");
-        }
-
         std::vector<uint8_t> result;
         result.reserve(numBytes); // Pre-allocate memory for efficiency
 
@@ -274,7 +268,7 @@ namespace esphome
             write_params_value.push_back(0x0B);
             write_params_value.push_back(0x00);
             write_params_value.insert(write_params_value.end(), response_speed.begin(), response_speed.end());
-            CmdFrameT write_config_cmd = this->build_cmd_frame(WRITE_PARAMS_CMD, write_params_value, sizeof(write_params_value) / sizeof(write_params_value[0]));
+            CmdFrameT write_config_cmd = this->build_cmd_frame(WRITE_PARAMS_CMD, write_params_value.data(), sizeof(write_params_value) / sizeof(write_params_value[0]));
             Frame *frame = this->send_command(write_config_cmd, true);
             if (frame)
             {
