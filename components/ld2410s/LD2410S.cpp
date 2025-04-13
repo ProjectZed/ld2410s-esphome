@@ -268,17 +268,17 @@ namespace esphome
             write_params_value.push_back(0x00);
             write_params_value.insert(write_params_value.end(), delay_time.begin(), delay_time.end());
 
-            auto status_frequency = decimalToLittleEndian(40, 4);
+            auto status_frequency = decimalToLittleEndian(5, 4);
             write_params_value.push_back(0x02);
             write_params_value.push_back(0x00);
             write_params_value.insert(write_params_value.end(), status_frequency.begin(), status_frequency.end());
 
-            auto distance_frequency = decimalToLittleEndian(40, 4);
+            auto distance_frequency = decimalToLittleEndian(5, 4);
             write_params_value.push_back(0x0C);
             write_params_value.push_back(0x00);
             write_params_value.insert(write_params_value.end(), distance_frequency.begin(), distance_frequency.end());
 
-            auto response_speed = decimalToLittleEndian(10, 4);
+            auto response_speed = decimalToLittleEndian(5, 4);
             write_params_value.push_back(0x0B);
             write_params_value.push_back(0x00);
             write_params_value.insert(write_params_value.end(), response_speed.begin(), response_speed.end());
