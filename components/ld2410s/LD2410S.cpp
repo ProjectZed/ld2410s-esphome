@@ -86,6 +86,7 @@ namespace esphome
             this->read_fw_version();
             this->write_common_parameters();
             this->read_common_parameters();
+            this->set_data_format(false);
             this->read_threshold_parameters();
             this->disable_configuration_command();
         }
@@ -195,6 +196,20 @@ namespace esphome
             else
             {
                 ESP_LOGE(TAG, "Failed to send command: 0x%04X", dis_conf_cmd.command);
+            }
+        }
+
+        void LD2410S::set_data_format(bool short_format)
+        {
+            CmdFrameT set_format_cmd = this->build_cmd_frame(SET_DATA_FORMAT_CMD, short_format ? SHORT_DATA_FORMAT_VALUE : LONG_DATA_FORMAT_VALUE, sizeof(short_format ? SHORT_DATA_FORMAT_VALUE : LONG_DATA_FORMAT_VALUE) / sizeof(short_format ? SHORT_DATA_FORMAT_VALUE : LONG_DATA_FORMAT_VALUE[0]));
+            Frame *frame = this->send_command(set_format_cmd, true);
+            if (frame)
+            {
+                log_frame(*frame);
+            }
+            else
+            {
+                ESP_LOGE(TAG, "Failed to send command: 0x%04X", set_format_cmd.command);
             }
         }
 

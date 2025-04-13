@@ -28,6 +28,11 @@ namespace esphome
         static const uint16_t END_CONFIG_MODE_CMD = 0x00FE;
         static const uint16_t END_CONFIG_MODE_REPLY = 0x01FE;
 
+        static const uint16_t SET_DATA_FORMAT_CMD = 0x007A;
+        static const uint8_t SHORT_DATA_FORMAT_VALUE[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+        static const uint8_t LONG_DATA_FORMAT_VALUE[] = {0x00, 0x00, 0x00, 0x01, 0x00, 0x00};
+        static const uint16_t SET_DATA_FORMAT_REPLY = 0x017A;
+
         static const uint16_t READ_FW_CMD = 0x0000;
         static const uint16_t READ_FW_REPLY = 0x0100;
 
@@ -134,6 +139,7 @@ namespace esphome
             Frame *send_command(CmdFrameT cmd_frame, bool wait_for_response);
             void enable_configuration_command();
             void disable_configuration_command();
+            void set_data_format(bool short_format);
             void read_fw_version();
             void read_common_parameters();
             void write_common_parameters();
