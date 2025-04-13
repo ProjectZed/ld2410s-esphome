@@ -169,6 +169,10 @@ namespace esphome
                     {
                         ESP_LOGI(TAG, "Presense: %llu\tDistance: %llu", littleEndianToDecimal({frame->data[1]}), littleEndianToDecimal({frame->data[2], frame->data[3]}));
                     }
+                    else if (frame->type == 0x02)
+                    {
+                        ESP_LOGI(TAG, "Presense: %llu\tDistance: %llu", littleEndianToDecimal({frame->data[7]}), littleEndianToDecimal({frame->data[8], frame->data[9]}));
+                    }
                 }
             }
         }
