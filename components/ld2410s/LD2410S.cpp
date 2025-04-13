@@ -84,7 +84,6 @@ namespace esphome
         {
             this->enable_configuration_command();
             this->read_fw_version();
-            this->read_common_parameters();
             this->write_common_parameters();
             this->read_common_parameters();
             this->read_threshold_parameters();
@@ -388,7 +387,7 @@ namespace esphome
             snprintf(buffer, sizeof(buffer), "Command Frame\n%s\n%s\n%s\n%s\n%s\n%s",
                      line_2, line_3, line_4, line_5, line_6, line_7);
 
-            ESP_LOGD(TAG, "%s", buffer);
+            ESP_LOGI(TAG, "%s", buffer);
             delay(10);
         }
 
