@@ -30,7 +30,7 @@ namespace esphome
 
         static const uint16_t SET_DATA_FORMAT_CMD = 0x007A;
         static const uint8_t SHORT_DATA_FORMAT_VALUE[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-        static const uint8_t LONG_DATA_FORMAT_VALUE[] = {0x00, 0x00, 0x00, 0x01, 0x00, 0x00};
+        static const uint8_t LONG_DATA_FORMAT_VALUE[] = {0x00, 0x00, 0x01, 0x00, 0x00, 0x00};
         static const uint16_t SET_DATA_FORMAT_REPLY = 0x017A;
 
         static const uint16_t READ_FW_CMD = 0x0000;
