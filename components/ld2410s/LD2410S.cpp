@@ -267,6 +267,7 @@ namespace esphome
             write_params_value.push_back(0x0B);
             write_params_value.push_back(0x00);
             write_params_value.insert(write_params_value.end(), response_speed.begin(), response_speed.end());
+            log_buffer("Write Params:", write_params_value, write_params_value.size());
             CmdFrameT write_config_cmd = this->build_cmd_frame(WRITE_PARAMS_CMD, write_params_value.data(), sizeof(write_params_value) / sizeof(write_params_value[0]));
             Frame *frame = this->send_command(write_config_cmd, true);
             if (frame)

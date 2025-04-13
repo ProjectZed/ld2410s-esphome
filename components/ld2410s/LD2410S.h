@@ -39,6 +39,9 @@ namespace esphome
         static const uint8_t READ_THRESHOLD_VALUE[] = {0x00, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03, 0x00, 0x04, 0x00, 0x05, 0x00, 0x06, 0x00, 0x07, 0x00, 0x08, 0x00, 0x09, 0x00, 0x0A, 0x00, 0x0B, 0x00, 0x0C, 0x00, 0x0D, 0x00, 0x0E, 0x00, 0x0F, 0x00};
         static const uint16_t READ_THRESHOLD_REPLY = 0x0173;
 
+        static const uint16_t WRITE_PARAMS_CMD = 0x0070;
+        static const uint16_t WRITE_PARAMS_REPLY = 0x0170;
+
         // Short reporting format
         static const uint16_t DATA_FRAME_HEADER = 0x6E;
         static const uint16_t DATA_FRAME_FOOTER = 0x62;
@@ -46,7 +49,6 @@ namespace esphome
         static const uint32_t THRESHOLD_HEADER = 0xF1F2F3F4;
         static const uint32_t THRESHOLD_FOOTER = 0xF5F6F7F8;
 
-        static const uint16_t WRITE_PARAMS_CMD = 0x0070;
         static const uint16_t AUTO_UPDATE_THRESHOLD_CMD = 0x0009;
 
         static const uint16_t CFG_MAX_DETECTION_VALUE = 0x0005;
@@ -58,9 +60,6 @@ namespace esphome
         static const uint16_t THRESHOLD_TRIGGER_VALUE = 0x0002;
         static const uint16_t THRESHOLD_RETENTION_VALUE = 0x0001;
         static const uint16_t THRESHOLD_TIME_VALUE = 0x0078;
-
-        static const uint16_t WRITE_PARAMS_REPLAY = 0x0170;
-        static const uint16_t READ_PARAMS_REPLAY = 0x0171;
 
         static const std::string RESPONSE_SPEED_NORMAL = "Normal";
         static const std::string RESPONSE_SPEED_FAST = "Fast";
