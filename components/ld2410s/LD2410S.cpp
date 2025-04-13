@@ -201,7 +201,7 @@ namespace esphome
 
         void LD2410S::set_data_format(bool short_format)
         {
-            CmdFrameT set_format_cmd = this->build_cmd_frame(SET_DATA_FORMAT_CMD, short_format ? SHORT_DATA_FORMAT_VALUE : LONG_DATA_FORMAT_VALUE, sizeof(short_format ? SHORT_DATA_FORMAT_VALUE : LONG_DATA_FORMAT_VALUE) / sizeof(short_format ? SHORT_DATA_FORMAT_VALUE : LONG_DATA_FORMAT_VALUE[0]));
+            CmdFrameT set_format_cmd = this->build_cmd_frame(SET_DATA_FORMAT_CMD, short_format ? SHORT_DATA_FORMAT_VALUE : LONG_DATA_FORMAT_VALUE, sizeof(short_format ? SHORT_DATA_FORMAT_VALUE : LONG_DATA_FORMAT_VALUE) / sizeof(short_format ? SHORT_DATA_FORMAT_VALUE[0] : LONG_DATA_FORMAT_VALUE[0]));
             Frame *frame = this->send_command(set_format_cmd, true);
             if (frame)
             {
