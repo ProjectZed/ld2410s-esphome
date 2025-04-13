@@ -83,7 +83,7 @@ namespace esphome
         void LD2410S::setup()
         {
             this->enable_configuration_command();
-            this->set_data_format(false);
+            this->set_data_format(true);
             this->read_fw_version();
             this->write_common_parameters();
             this->read_common_parameters();
