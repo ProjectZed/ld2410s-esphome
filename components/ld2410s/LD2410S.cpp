@@ -148,7 +148,7 @@ namespace esphome
             }
 
             // Output the log
-            ESP_LOGD(TAG, "%s", log_buffer);
+            ESP_LOGI(TAG, "%s", log_buffer);
             delay(10);
         }
 
