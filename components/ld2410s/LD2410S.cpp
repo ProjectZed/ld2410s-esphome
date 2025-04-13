@@ -243,13 +243,13 @@ namespace esphome
 
         void LD2410S::write_common_parameters()
         {
-            std::vector<u_int8_t> write_params_value = {}
-            
+            std::vector<u_int8_t> write_params_value = {};
+
             auto farthest_gate = decimalToLittleEndian(16, 4);
             write_params_value.push_back(0x05);
             write_params_value.push_back(0x00);
             write_params_value.insert(write_params_value.end(), farthest_gate.begin(), farthest_gate.end());
-            
+
             auto nearest_gate = decimalToLittleEndian(0, 4);
             write_params_value.push_back(0x0A);
             write_params_value.push_back(0x00);
