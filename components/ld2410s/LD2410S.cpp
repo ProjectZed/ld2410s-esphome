@@ -245,6 +245,17 @@ namespace esphome
                 this->current_config.status_freq = littleEndianToDecimal({frame->data[22], frame->data[25]});
                 this->current_config.dist_freq = littleEndianToDecimal({frame->data[26], frame->data[29]});
                 this->current_config.resp_speed = littleEndianToDecimal({frame->data[30], frame->data[33]});
+#ifdef USE_NUMBER
+                this->max_distance_number->publish_state(this->current_config.max_dist);
+                this->min_distance_number->publish_state(this->current_config.min_dist);
+                this->no_delay_number->publish_state(this->current_config.delay);
+                this->status_reporting_freq_number->publish_state(this->current_config.status_freq / 10);
+                this->distance_reporting_freq_number->publish_state(this->current_config.dist_freq / 10);
+#endif
+#ifdef USE_SELECT
+                this->response_speed_select->publish_state(this->current_config.resp_speed == 5 ? RESPONSE_SPEED_NORMAL : RESPONSE_SPEED_FAST);
+#endif
+                memcpy(&this->new_config, &this->current_config, sizeof(this->current_config));
                 ESP_LOGI(TAG, "Config: max_dist=%d, min_dist=%d, delay=%d, status_freq=%d, dist_freq=%d, resp_speed=%d", this->current_config.max_dist, this->current_config.min_dist, this->current_config.delay, this->current_config.status_freq, this->current_config.dist_freq, this->current_config.resp_speed);
             }
             else
