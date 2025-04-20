@@ -7,16 +7,16 @@
 
 namespace
 {
-    uint64_t littleEndianToDecimal(std::initializer_list<uint8_t> bytes)
+    uint16_t littleEndianToDecimal(std::initializer_list<uint8_t> bytes)
     {
-        uint64_t result = 0;
+        uint16_t result = 0;
         size_t index = 0;
         // Process each byte, starting with least significant (first in little-endian)
         for (uint8_t byte : bytes)
         {
             // Shift each byte to its proper position and OR it into the result
             // First byte (i=0) doesn't need shifting, second byte (i=1) shifts 8 bits, etc.
-            result |= static_cast<uint64_t>(byte) << (index * 8);
+            result |= static_cast<uint16_t>(byte) << (index * 8);
 
             // Don't forget to increment the index
             index++;
@@ -24,7 +24,7 @@ namespace
         return result;
     }
 
-    std::vector<uint8_t> decimalToLittleEndian(uint64_t value, size_t numBytes)
+    std::vector<uint8_t> decimalToLittleEndian(uint16_t value, size_t numBytes)
     {
         std::vector<uint8_t> result;
         result.reserve(numBytes); // Pre-allocate memory for efficiency
