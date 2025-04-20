@@ -239,7 +239,8 @@ namespace esphome
             Frame *frame = this->send_command(read_config_cmd, true);
             if (frame)
             {
-                this->current_config.max_dist = littleEndianToDecimal({frame->data[10], frame->data[13]}) this->current_config.min_dist = littleEndianToDecimal({frame->data[14], frame->data[17]});
+                this->current_config.max_dist = littleEndianToDecimal({frame->data[10], frame->data[13]});
+                this->current_config.min_dist = littleEndianToDecimal({frame->data[14], frame->data[17]});
                 this->current_config.delay = littleEndianToDecimal({frame->data[18], frame->data[21]});
                 this->current_config.status_freq = littleEndianToDecimal({frame->data[22], frame->data[25]});
                 this->current_config.dist_freq = littleEndianToDecimal({frame->data[26], frame->data[29]});
