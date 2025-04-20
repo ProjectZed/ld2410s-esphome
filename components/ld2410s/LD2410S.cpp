@@ -239,13 +239,12 @@ namespace esphome
             Frame *frame = this->send_command(read_config_cmd, true);
             if (frame)
             {
-                ESP_LOGI(TAG, "Frame Length: %llu", littleEndianToDecimal({frame->data[4], frame->data[5]}));
-                ESP_LOGI(TAG, "Furthest Distance: %llu", littleEndianToDecimal({frame->data[10], frame->data[13]}));
-                ESP_LOGI(TAG, "Nearest Distance: %llu", littleEndianToDecimal({frame->data[14], frame->data[17]}));
-                ESP_LOGI(TAG, "Unattended Delay: %llu", littleEndianToDecimal({frame->data[18], frame->data[21]}));
-                ESP_LOGI(TAG, "Status Frequency: %llu", littleEndianToDecimal({frame->data[22], frame->data[25]}));
-                ESP_LOGI(TAG, "Distance Frequency: %llu", littleEndianToDecimal({frame->data[26], frame->data[29]}));
-                ESP_LOGI(TAG, "Response Speed: %llu", littleEndianToDecimal({frame->data[30], frame->data[33]}));
+                this->current_config.max_dist = littleEndianToDecimal({frame->data[10], frame->data[13]}) this->current_config.min_dist = littleEndianToDecimal({frame->data[14], frame->data[17]});
+                this->current_config.delay = littleEndianToDecimal({frame->data[18], frame->data[21]});
+                this->current_config.status_freq = littleEndianToDecimal({frame->data[22], frame->data[25]});
+                this->current_config.dist_freq = littleEndianToDecimal({frame->data[26], frame->data[29]});
+                this->current_config.resp_speed = littleEndianToDecimal({frame->data[30], frame->data[33]});
+                ESP_LOGI(TAG, "Config: max_dist=%d, min_dist=%d, delay=%d, status_freq=%d, dist_freq=%d, resp_speed=%d", this->current_config.max_dist, this->current_config.min_dist, this->current_config.delay, this->current_config.status_freq, this->current_config.dist_freq, this->current_config.resp_speed);
             }
             else
             {

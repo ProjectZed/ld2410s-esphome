@@ -71,12 +71,12 @@ namespace esphome
 
         struct Config
         {
-            uint32_t max_dist{0};
-            uint32_t min_dist{0};
-            uint32_t delay{0};
-            uint32_t status_freq{0};
-            uint32_t dist_freq{0};
-            uint32_t resp_speed{0};
+            uint16_t max_dist{0};
+            uint16_t min_dist{0};
+            uint16_t delay{0};
+            uint16_t status_freq{0};
+            uint16_t dist_freq{0};
+            uint16_t resp_speed{0};
         };
 
         struct CmdFrameT
