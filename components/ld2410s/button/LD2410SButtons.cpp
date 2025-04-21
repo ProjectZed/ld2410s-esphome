@@ -16,7 +16,7 @@ namespace esphome
 
         void LD2410SApplyConfigButton::press_action()
         {
-            this->parent_->apply_config();
+            this->parent_->write_common_parameters();
         }
 
         void LD2410SAutoConfigThreshold::press_action()
