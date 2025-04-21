@@ -223,9 +223,9 @@ namespace esphome
             Frame *frame = this->send_command(read_fw_cmd, true);
             if (frame)
             {
-                major_v = littleEndianToDecimal({frame->data[14], frame->data[15]});
-                minor_v = littleEndianToDecimal({frame->data[16], frame->data[17]});
-                patch_v = littleEndianToDecimal({frame->data[18], frame->data[19]});
+                uint16_t major_v = littleEndianToDecimal({frame->data[14], frame->data[15]});
+                uint16_t minor_v = littleEndianToDecimal({frame->data[16], frame->data[17]});
+                uint16_t patch_v = littleEndianToDecimal({frame->data[18], frame->data[19]});
                 std::string version = "v" + std::to_string(major_v) + "." + std::to_string(minor_v) + "." + std::to_string(patch_v);
                 for (auto &listener : this->listeners)
                 {
