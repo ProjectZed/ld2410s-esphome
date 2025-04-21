@@ -309,7 +309,7 @@ namespace esphome
             Frame *frame = this->send_command(write_config_cmd, true);
             if (frame)
             {
-                log_frame(*frame);
+                ESP_LOGI(TAG, "Config written");
             }
             else
             {
@@ -464,16 +464,6 @@ namespace esphome
             delay(10);
         }
 
-        void LD2410S::apply_config()
-        {
-            // this->status_set_warning("Sending command to sensor");
-            // this->enable_configuration_command();
-            // CmdFrameT apply_config_cmd = this->prepare_apply_config_cmd();
-            // this->send_command(apply_config_cmd, true);
-            // this->disable_configuration_command();
-            // this->status_clear_warning();
-        }
-
         void LD2410S::start_auto_threshold_update()
         {
             // this->status_set_warning("Sending command to sensor");
@@ -527,49 +517,6 @@ namespace esphome
             }
             return nullptr;
         }
-
-        // bool LD2410S::process_cmd_ack_package(uint8_t *buffer, int len)
-        // {
-        //     CmdAckT ack = this->parse_ack(buffer, len);
-        //     int command_word = ack.command;
-        //     bool result = ack.result;
-        //     if (!result)
-        //     {
-        //         ESP_LOGE(TAG, "Command Failed: 0x%04X", command_word);
-        //         return false;
-        //     }
-        //     else
-        //     {
-        //         ESP_LOGI(TAG, "Command Success: 0x%04X", command_word);
-        //     }
-        //     uint8_t *data = ack.data;
-        //     log_buffer("ACK:", data, sizeof(data));
-        //     switch (command_word)
-        //     {
-        //     case START_CONFIG_MODE_REPLY:
-        //         ESP_LOGD(TAG, "Config mode enabled");
-        //         break;
-        //     case END_CONFIG_MODE_REPLY:
-        //         ESP_LOGD(TAG, "Config mode disabled");
-        //         break;
-        //     case READ_PARAMS_REPLAY:
-        //         this->process_config_read_ack(data);
-        //         break;
-        //     case WRITE_PARAMS_REPLAY:
-        //         ESP_LOGD(TAG, "Write config reply processed");
-        //         break;
-        //     case READ_FW_REPLY:
-        //         this->process_read_fw_ack(data);
-        //         break;
-        //     case READ_SN_REPLY:
-        //         this->process_read_sn_ack(data);
-        //         break;
-        //     default:
-        //         ESP_LOGD(TAG, "Unknown reply: %x", command_word);
-        //         break;
-        //     }
-        //     return true;
-        // }
 
         void LD2410S::process_short_data_package(uint8_t *data)
         {

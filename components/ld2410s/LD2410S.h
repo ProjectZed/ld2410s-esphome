@@ -145,7 +145,6 @@ namespace esphome
             void write_common_parameters();
             void read_threshold_parameters();
 
-            void apply_config();
             void start_auto_threshold_update();
 #ifdef USE_NUMBER
             void set_max_distance_number(number::Number *max_distance_number) { this->max_distance_number = max_distance_number; };
@@ -182,18 +181,6 @@ namespace esphome
 #ifdef USE_SELECT
             select::Select *response_speed_select{nullptr};
 #endif
-            void process_data_package(PackageType type, uint8_t *buffer, size_t pos);
-            int read_int(uint8_t *buffer, size_t pos, size_t len)
-            {
-                unsigned int ret = 0;
-                int shift = 0;
-                for (size_t i = 0; i < len; i++)
-                {
-                    ret |= static_cast<unsigned int>(buffer[pos + i]) << shift;
-                    shift += 8;
-                }
-                return ret;
-            };
             int two_byte_to_int(uint8_t firstbyte, uint8_t secondbyte) { return (secondbyte << 8) + firstbyte; };
             void process_short_data_package(uint8_t *data);
             void process_threshold_package(uint8_t *data);
