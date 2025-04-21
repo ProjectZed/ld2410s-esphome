@@ -223,9 +223,15 @@ namespace esphome
             Frame *frame = this->send_command(read_fw_cmd, true);
             if (frame)
             {
-                ESP_LOGI(TAG, "Fireware Version Major: %d", littleEndianToDecimal({frame->data[14], frame->data[15]}));
-                ESP_LOGI(TAG, "Fireware Version Minor: %d", littleEndianToDecimal({frame->data[16], frame->data[17]}));
-                ESP_LOGI(TAG, "Fireware Version Patch: %d", littleEndianToDecimal({frame->data[18], frame->data[19]}));
+                major_v = littleEndianToDecimal({frame->data[14], frame->data[15]});
+                minor_v = littleEndianToDecimal({frame->data[16], frame->data[17]});
+                patch_v = littleEndianToDecimal({frame->data[18], frame->data[19]});
+                std::string version = "v" + std::to_string(major_v) + "." + std::to_string(minor_v) + "." + std::to_string(patch_v);
+                for (auto &listener : this->listeners)
+                {
+                    listener->on_fw_version(version);
+                }
+                ESP_LOGD(TAG, "Firmware Version: %s", version.c_str());
             }
             else
             {
@@ -518,42 +524,6 @@ namespace esphome
                 ESP_LOGE(TAG, "Command timeout");
             }
             return nullptr;
-        }
-
-        void LD2410S::process_config_read_ack(uint8_t *data)
-        {
-            int max_dist = this->read_int(data, 0, 4);
-            int min_dist = this->read_int(data, 4, 4);
-            int delay = this->read_int(data, 8, 4);
-            int status_resp_freq = this->read_int(data, 12, 4);
-            int dist_resp_freq = this->read_int(data, 16, 4);
-            int resp_speed = this->read_int(data, 20, 4);
-#ifdef USE_NUMBER
-            this->max_distance_number->publish_state(max_dist);
-            this->min_distance_number->publish_state(min_dist);
-            this->no_delay_number->publish_state(delay);
-            this->status_reporting_freq_number->publish_state(status_resp_freq / 10);
-            this->distance_reporting_freq_number->publish_state(dist_resp_freq / 10);
-#endif
-#ifdef USE_SELECT
-            this->response_speed_select->publish_state(resp_speed == 5 ? RESPONSE_SPEED_NORMAL : RESPONSE_SPEED_FAST);
-#endif
-            memcpy(&this->new_config, &this->current_config, sizeof(this->current_config));
-            ESP_LOGD(TAG, "Read config reply: max_dist=%d, min_dist=%d, delay=%d, status_resp_freq=%d, dist_resp_freq=%d, resp_speed=%d", max_dist, min_dist, delay, status_resp_freq, dist_resp_freq, resp_speed);
-        }
-
-        void LD2410S::process_read_fw_ack(uint8_t *data)
-        {
-            ESP_LOGD(TAG, "Read firmware DATA: %x", data);
-            int major_v = static_cast<int>(data[0]);
-            int minor_v = static_cast<int>(data[1]);
-            int patch_v = static_cast<int>(data[2]);
-            std::string version = "v" + std::to_string(major_v) + "." + std::to_string(minor_v) + "." + std::to_string(patch_v);
-            for (auto &listener : this->listeners)
-            {
-                listener->on_fw_version(version);
-            }
-            ESP_LOGD(TAG, "Read firmware reply: %s", version.c_str());
         }
 
         // bool LD2410S::process_cmd_ack_package(uint8_t *buffer, int len)

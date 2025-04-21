@@ -195,9 +195,6 @@ namespace esphome
                 return ret;
             };
             int two_byte_to_int(uint8_t firstbyte, uint8_t secondbyte) { return (secondbyte << 8) + firstbyte; };
-            // CmdAckT parse_ack(uint8_t* buffer, size_t length);
-            void process_config_read_ack(uint8_t *data);
-            void process_read_fw_ack(uint8_t *data);
             void process_short_data_package(uint8_t *data);
             void process_threshold_package(uint8_t *data);
         };
