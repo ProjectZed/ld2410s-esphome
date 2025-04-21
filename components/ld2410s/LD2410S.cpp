@@ -182,6 +182,7 @@ namespace esphome
             Frame *frame = this->send_command(en_conf_cmd, true);
             if (frame)
             {
+                ESP_LOGI(TAG, "Config mode enabled");
             }
             else
             {
@@ -195,6 +196,7 @@ namespace esphome
             Frame *frame = this->send_command(dis_conf_cmd, true);
             if (frame)
             {
+                ESP_LOGI(TAG, "Config mode disabled");
             }
             else
             {
