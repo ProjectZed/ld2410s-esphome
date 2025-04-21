@@ -94,9 +94,27 @@ async def to_code(config):
     ld2410s = await cg.get_variable(config[CONF_LD2410S_ID])
 
     number_mappings = [
-        (CONF_MAX_DISTANCE, ld2410s.set_max_distance_number, 0, 8.4, 1),
-        (CONF_MIN_DISTANCE, ld2410s.set_min_distance_number, 0, 8.4, 1),
-        (CONF_NO_DELAY, ld2410s.set_no_delay_number, 10, 120, 1),
+        (
+            CONF_MAX_DISTANCE,
+            ld2410s.set_max_distance_number,
+            1,
+            16,
+            1,
+        ),
+        (
+            CONF_MIN_DISTANCE,
+            ld2410s.set_min_distance_number,
+            0,
+            16,
+            1,
+        ),
+        (
+            CONF_NO_DELAY,
+            ld2410s.set_no_delay_number,
+            10,
+            120,
+            1,
+        ),
         (
             CONF_STATUS_REPORT_FREQ,
             ld2410s.set_status_reporting_freq_number,
