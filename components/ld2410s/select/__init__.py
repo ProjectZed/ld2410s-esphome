@@ -5,26 +5,40 @@ from esphome.const import ENTITY_CATEGORY_CONFIG
 
 from .. import CONF_LD2410S_ID, LD2410S, ld2410s_ns
 
+
+# Config keys and options
 CONF_RESPONSE_SPEED = "response_speed"
-CONF_SELECTS = ["Normal", "Fast"]
-
-LD2420ResponseSpeedSelect = ld2410s_ns.class_("LD2420ResponseSpeedSelect", cg.Component)
-
-CONFIG_SCHEMA = {
-    cv.GenerateID(CONF_LD2410S_ID): cv.use_id(LD2410S),
-    cv.Required(CONF_RESPONSE_SPEED): select.select_schema(
-        LD2420ResponseSpeedSelect,
-        entity_category=ENTITY_CATEGORY_CONFIG,
-    ),
-}
+RESPONSE_SPEED_OPTIONS = ["Normal", "Fast"]
 
 
+# Select class declaration
+LD2410SResponseSpeedSelect = ld2410s_ns.class_(
+    "LD2410SResponseSpeedSelect",
+    select.Select,
+    cg.Component,
+)
+
+
+# Config schema
+CONFIG_SCHEMA = cv.Schema(
+    {
+        cv.GenerateID(CONF_LD2410S_ID): cv.use_id(LD2410S),
+        cv.Required(CONF_RESPONSE_SPEED): select.select_schema(
+            LD2410SResponseSpeedSelect,
+            entity_category=ENTITY_CATEGORY_CONFIG,
+        ),
+    }
+)
+
+
+# Code generation
 async def to_code(config):
-    LD2410S_component = await cg.get_variable(config[CONF_LD2410S_ID])
-    if response_speed_config := config.get(CONF_RESPONSE_SPEED):
+    ld2410s = await cg.get_variable(config[CONF_LD2410S_ID])
+
+    if response_speed_cfg := config.get(CONF_RESPONSE_SPEED):
         sel = await select.new_select(
-            response_speed_config,
-            options=CONF_SELECTS,
+            response_speed_cfg,
+            options=RESPONSE_SPEED_OPTIONS,
         )
         await cg.register_parented(sel, config[CONF_LD2410S_ID])
-        cg.add(LD2410S_component.set_response_speed_select(sel))
+        cg.add(ld2410s.set_response_speed_select(sel))

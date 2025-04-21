@@ -15,16 +15,31 @@ from esphome.const import (
 
 from .. import CONF_LD2410S_ID, LD2410S, ld2410s_ns
 
-LD2410SMaxDistanceNumber = ld2410s_ns.class_("LD2410SMaxDistanceNumber", number.Number)
-LD2410SMinDistanceNumber = ld2410s_ns.class_("LD2410SMinDistanceNumber", number.Number)
-LD2410SDelayNumber = ld2410s_ns.class_("LD2410SDelayNumber", number.Number)
+
+# Class declarations
+LD2410SMaxDistanceNumber = ld2410s_ns.class_(
+    "LD2410SMaxDistanceNumber",
+    number.Number,
+)
+LD2410SMinDistanceNumber = ld2410s_ns.class_(
+    "LD2410SMinDistanceNumber",
+    number.Number,
+)
+LD2410SDelayNumber = ld2410s_ns.class_(
+    "LD2410SDelayNumber",
+    number.Number,
+)
 LD2410SStatusReportingFreqNumber = ld2410s_ns.class_(
-    "LD2410SStatusReportingFreqNumber", number.Number
+    "LD2410SStatusReportingFreqNumber",
+    number.Number,
 )
 LD2410SDistReportingFreqNumber = ld2410s_ns.class_(
-    "LD2410SDistReportingFreqNumber", number.Number
+    "LD2410SDistReportingFreqNumber",
+    number.Number,
 )
 
+
+# Config keys
 CONF_MAX_DISTANCE = "max_distance"
 CONF_MIN_DISTANCE = "min_distance"
 CONF_NO_DELAY = "no_delay"
@@ -32,6 +47,8 @@ DISTANCE_GROUP = "distance_group"
 CONF_STATUS_REPORT_FREQ = "status_reporting_frequency"
 CONF_DISTANCE_REPORT_FREQ = "distance_reporting_frequency"
 
+
+# Config schema
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(CONF_LD2410S_ID): cv.use_id(LD2410S),
@@ -72,35 +89,34 @@ CONFIG_SCHEMA = cv.Schema(
 )
 
 
+# Code generation
 async def to_code(config):
-    LD2410S_component = await cg.get_variable(config[CONF_LD2410S_ID])
-    if max_distance_config := config.get(CONF_MAX_DISTANCE):
-        n = await number.new_number(
-            max_distance_config, min_value=0, max_value=8.4, step=1
-        )
-        await cg.register_parented(n, config[CONF_LD2410S_ID])
-        cg.add(LD2410S_component.set_max_distance_number(n))
-    if min_distance_config := config.get(CONF_MIN_DISTANCE):
-        n = await number.new_number(
-            min_distance_config, min_value=0, max_value=8.4, step=1
-        )
-        await cg.register_parented(n, config[CONF_LD2410S_ID])
-        cg.add(LD2410S_component.set_min_distance_number(n))
-    if no_delay_config := config.get(CONF_NO_DELAY):
-        n = await number.new_number(
-            no_delay_config, min_value=10, max_value=120, step=1
-        )
-        await cg.register_parented(n, config[CONF_LD2410S_ID])
-        cg.add(LD2410S_component.set_no_delay_number(n))
-    if status_reporting_freq_config := config.get(CONF_STATUS_REPORT_FREQ):
-        n = await number.new_number(
-            status_reporting_freq_config, min_value=0.5, max_value=8, step=0.5
-        )
-        await cg.register_parented(n, config[CONF_LD2410S_ID])
-        cg.add(LD2410S_component.set_status_reporting_freq_number(n))
-    if distance_reporting_freq_config := config.get(CONF_DISTANCE_REPORT_FREQ):
-        n = await number.new_number(
-            distance_reporting_freq_config, min_value=0.5, max_value=8, step=0.5
-        )
-        await cg.register_parented(n, config[CONF_LD2410S_ID])
-        cg.add(LD2410S_component.set_distance_reporting_freq_number(n))
+    ld2410s = await cg.get_variable(config[CONF_LD2410S_ID])
+
+    number_mappings = [
+        (CONF_MAX_DISTANCE, ld2410s.set_max_distance_number, 0, 8.4, 1),
+        (CONF_MIN_DISTANCE, ld2410s.set_min_distance_number, 0, 8.4, 1),
+        (CONF_NO_DELAY, ld2410s.set_no_delay_number, 10, 120, 1),
+        (
+            CONF_STATUS_REPORT_FREQ,
+            ld2410s.set_status_reporting_freq_number,
+            0.5,
+            8,
+            0.5,
+        ),
+        (
+            CONF_DISTANCE_REPORT_FREQ,
+            ld2410s.set_distance_reporting_freq_number,
+            0.5,
+            8,
+            0.5,
+        ),
+    ]
+
+    for key, setter, min_val, max_val, step in number_mappings:
+        if num_conf := config.get(key):
+            num = await number.new_number(
+                num_conf, min_value=min_val, max_value=max_val, step=step
+            )
+            await cg.register_parented(num, config[CONF_LD2410S_ID])
+            cg.add(setter(num))
