@@ -274,35 +274,36 @@ namespace esphome
         {
             std::vector<u_int8_t> write_params_value = {};
 
-            auto farthest_gate = decimalToLittleEndian(16, 4);
+            auto farthest_gate = decimalToLittleEndian(this->new_config.max_dist, 4);
             write_params_value.push_back(0x05);
             write_params_value.push_back(0x00);
             write_params_value.insert(write_params_value.end(), farthest_gate.begin(), farthest_gate.end());
 
-            auto nearest_gate = decimalToLittleEndian(0, 4);
+            auto nearest_gate = decimalToLittleEndian(this->new_config.min_dist, 4);
             write_params_value.push_back(0x0A);
             write_params_value.push_back(0x00);
             write_params_value.insert(write_params_value.end(), nearest_gate.begin(), nearest_gate.end());
 
-            auto delay_time = decimalToLittleEndian(10, 4);
+            auto delay_time = decimalToLittleEndian(this->new_config.delay, 4);
             write_params_value.push_back(0x06);
             write_params_value.push_back(0x00);
             write_params_value.insert(write_params_value.end(), delay_time.begin(), delay_time.end());
 
-            auto status_frequency = decimalToLittleEndian(5, 4);
+            auto status_frequency = decimalToLittleEndian(this->new_config.status_freq, 4);
             write_params_value.push_back(0x02);
             write_params_value.push_back(0x00);
             write_params_value.insert(write_params_value.end(), status_frequency.begin(), status_frequency.end());
 
-            auto distance_frequency = decimalToLittleEndian(5, 4);
+            auto distance_frequency = decimalToLittleEndian(this->new_config.dist_freq, 4);
             write_params_value.push_back(0x0C);
             write_params_value.push_back(0x00);
             write_params_value.insert(write_params_value.end(), distance_frequency.begin(), distance_frequency.end());
 
-            auto response_speed = decimalToLittleEndian(5, 4);
+            auto response_speed = decimalToLittleEndian(this->new_config.resp_speed, 4);
             write_params_value.push_back(0x0B);
             write_params_value.push_back(0x00);
             write_params_value.insert(write_params_value.end(), response_speed.begin(), response_speed.end());
+
             CmdFrameT write_config_cmd = this->build_cmd_frame(WRITE_PARAMS_CMD, write_params_value.data(), write_params_value.size());
             Frame *frame = this->send_command(write_config_cmd, true);
             if (frame)
