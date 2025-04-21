@@ -231,7 +231,7 @@ namespace esphome
                 {
                     listener->on_fw_version(version);
                 }
-                ESP_LOGD(TAG, "Firmware Version: %s", version.c_str());
+                ESP_LOGI(TAG, "Firmware Version: %s", version.c_str());
             }
             else
             {
