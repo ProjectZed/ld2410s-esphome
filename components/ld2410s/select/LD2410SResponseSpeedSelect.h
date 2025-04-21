@@ -7,10 +7,10 @@ namespace esphome
 {
     namespace ld2410s
     {
-        class LD2420SResponseSpeedSelect : public Component, public select::Select, public Parented<LD2410S>
+        class LD2410SResponseSpeedSelect : public Component, public select::Select, public Parented<LD2410S>
         {
         public:
-            LD2420SResponseSpeedSelect() = default;
+            LD2410SResponseSpeedSelect() = default;
 
         protected:
             void control(const std::string &value) override;

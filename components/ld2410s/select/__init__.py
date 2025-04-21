@@ -14,6 +14,7 @@ RESPONSE_SPEED_OPTIONS = ["Normal", "Fast"]
 # Select class declaration
 LD2410SResponseSpeedSelect = ld2410s_ns.class_(
     "LD2410SResponseSpeedSelect",
+    select.Select,
     cg.Component,
 )
 
