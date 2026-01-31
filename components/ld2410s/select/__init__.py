@@ -10,12 +10,12 @@ CONF_SELECTS = [
     "Fast"
 ]
 
-LD2420ResponseSpeedSelect = ld2410s_ns.class_("LD2420ResponseSpeedSelect", cg.Component)
+LD2410SResponseSpeedSelect = ld2410s_ns.class_("LD2410SResponseSpeedSelect", cg.Component)
 
 CONFIG_SCHEMA = {
     cv.GenerateID(CONF_LD2410S_ID): cv.use_id(LD2410S),
     cv.Required(CONF_RESPONSE_SPEED): select.select_schema(
-        LD2420ResponseSpeedSelect,
+        LD2410SResponseSpeedSelect,
         entity_category=ENTITY_CATEGORY_CONFIG,
     ),
 }
